@@ -1,0 +1,386 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  :root {
+    --primary: #1F6F63;
+    --primary-hover: #17574D;
+    --accent-emerald: #10B981;
+    --accent-teal-glow: #2DD4BF;
+    --mint-surface: #E3F1ED;
+    --mint-subtle: #F2F7F6;
+    --ring-track: #C9DDD7;
+    --bg-canvas: #FBFBFD;
+    --bg-mint: #F2F7F6;
+    --bg-dark-stage: #0B1220;
+    --bg-footer: #F5F5F7;
+    --surface: #FFFFFF;
+    --surface-muted: #F2F7F6;
+    --text-primary: #0F1F2E;
+    --text-secondary: #3A4753;
+    --success: #15803D;
+    --warning: #B45309;
+    --danger: #C81E1E;
+    --border-subtle: rgba(15, 31, 46, 0.08);
+    --shadow-apple: 0 8px 30px rgba(0, 0, 0, 0.06);
+    --shadow-apple-hover: 0 16px 38px rgba(0, 0, 0, 0.09);
+
+    /* Fluid Type Scale (rem-based for A / A+ / A++ accessibility scaling) */
+    --type-hero: clamp(2.5rem, 4.4vw + 0.9rem, 5rem);
+    --type-section: clamp(2rem, 2.8vw + 0.85rem, 3.5rem);
+    --type-h2: clamp(1.5rem, 1.5vw + 1rem, 2rem);
+    --type-h3: 1.25rem;
+    --type-body: 1.25rem;
+    --type-body-min: 1.125rem;
+    --type-small: 1rem;
+    --type-caption: 0.875rem;
+  }
+
+  html.dark {
+    --primary: #2DD4BF;
+    --primary-hover: #5EEAD4;
+    --accent-emerald: #34D399;
+    --accent-teal-glow: #2DD4BF;
+    --mint-surface: #112A27;
+    --mint-subtle: #0B1220;
+    --ring-track: #1F3B37;
+    --bg-canvas: #000000;
+    --bg-mint: #0B1220;
+    --bg-dark-stage: #0B1220;
+    --bg-footer: #0B1220;
+    --surface: #111A2B;
+    --surface-muted: #0F172A;
+    --text-primary: #F8FAFC;
+    --text-secondary: #D3DFE9;
+    --success: #34D399;
+    --warning: #FBBF24;
+    --danger: #EF4444;
+    --border-subtle: rgba(248, 250, 252, 0.12);
+    --shadow-apple: 0 8px 30px rgba(0, 0, 0, 0.45);
+    --shadow-apple-hover: 0 18px 42px rgba(0, 0, 0, 0.6);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    font-size: 100%;
+  }
+
+  html.text-size-normal {
+    font-size: 100%;
+  }
+
+  html.text-size-large {
+    font-size: 112.5%;
+  }
+
+  html.text-size-xl {
+    font-size: 125%;
+  }
+
+  section[id],
+  div[id] {
+    scroll-margin-top: 5.5rem;
+  }
+
+  html,
+  body {
+    overflow-x: clip;
+  }
+
+  body {
+    font-family: 'Noto Sans', 'Noto Sans Tamil', system-ui, sans-serif;
+    background-color: var(--bg-canvas);
+    color: var(--text-primary);
+    font-size: var(--type-body);
+    font-weight: 400;
+    line-height: 1.6;
+    transition: background-color 220ms ease, color 220ms ease;
+  }
+
+  html[lang="ta"] body {
+    line-height: 1.7;
+  }
+
+  html[lang="en"] body {
+    line-height: 1.6;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Noto Sans', 'Noto Sans Tamil', system-ui, sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    color: var(--text-primary);
+  }
+
+  html[lang="ta"] h1,
+  html[lang="ta"] h2,
+  html[lang="ta"] h3,
+  html[lang="ta"] h4,
+  html[lang="ta"] h5,
+  html[lang="ta"] h6 {
+    letter-spacing: normal;
+    line-height: 1.4;
+    padding-block: 0.1em;
+  }
+
+  button,
+  a[role="button"] {
+    font-weight: 600;
+  }
+}
+
+/* Apple Product Page Typography Utilities */
+.apple-hero-title {
+  font-family: 'Noto Sans', 'Noto Sans Tamil', system-ui, sans-serif;
+  font-size: var(--type-hero);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+html[lang="ta"] .apple-hero-title {
+  letter-spacing: normal;
+  line-height: 1.35;
+  padding-block: 0.1em;
+}
+
+.apple-section-title {
+  font-family: 'Noto Sans', 'Noto Sans Tamil', system-ui, sans-serif;
+  font-size: var(--type-section);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.14;
+}
+
+html[lang="ta"] .apple-section-title {
+  letter-spacing: normal;
+  line-height: 1.35;
+  padding-block: 0.1em;
+}
+
+.apple-headline-gradient {
+  display: inline-block;
+  padding-block: 0.1em;
+  background-image: linear-gradient(135deg, #1F6F63 0%, #10B981 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+html.dark .apple-headline-gradient {
+  background-image: linear-gradient(135deg, #2DD4BF 0%, #34D399 100%);
+}
+
+html.high-contrast .apple-headline-gradient {
+  background-image: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  color: var(--primary);
+}
+
+.apple-section-pad {
+  padding-block: clamp(5.5rem, 9vw, 9.5rem);
+}
+
+.tamil-safe {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  hyphens: none;
+  padding-block: 0.1em;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+.headline-balance {
+  text-wrap: balance;
+}
+
+.dashboard-h2 {
+  font-size: var(--type-h2);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  hyphens: none;
+}
+
+/* Accessible High-Contrast Focus Ring */
+:focus-visible {
+  outline: 3px solid #1F6F63;
+  outline-offset: 3px;
+}
+
+html.dark :focus-visible {
+  outline-color: #2DD4BF;
+}
+
+/* True High-Contrast Mode Override */
+html.high-contrast {
+  --bg-canvas: #FFFFFF;
+  --bg-mint: #FFFFFF;
+  --bg-footer: #FFFFFF;
+  --surface: #FFFFFF;
+  --surface-muted: #F3F4F6;
+  --mint-surface: #E5E7EB;
+  --mint-subtle: #F9FAFB;
+  --text-primary: #000000;
+  --text-secondary: #0F172A;
+  --primary: #0F4D44;
+  --primary-hover: #09362F;
+  --border-subtle: #000000;
+  --shadow-apple: none;
+  --shadow-apple-hover: none;
+}
+
+html.high-contrast.dark {
+  --bg-canvas: #000000;
+  --bg-mint: #000000;
+  --bg-footer: #000000;
+  --surface: #000000;
+  --surface-muted: #111111;
+  --mint-surface: #1A1A1A;
+  --mint-subtle: #0A0A0A;
+  --text-primary: #FFFFFF;
+  --text-secondary: #FDE047;
+  --primary: #FACC15;
+  --primary-hover: #FEF08A;
+  --border-subtle: #FFFFFF;
+}
+
+html.high-contrast .hc-card {
+  border: 2px solid currentColor !important;
+  box-shadow: none !important;
+}
+
+html.high-contrast.dark .hc-primary-btn {
+  background-color: #FACC15 !important;
+  color: #000000 !important;
+  border: 2px solid #FFFFFF !important;
+}
+
+html.high-contrast:not(.dark) .hc-primary-btn {
+  background-color: #000000 !important;
+  color: #FFFFFF !important;
+  border: 2px solid #000000 !important;
+}
+
+/* Apple Product Card Surface (28px radius, soft ambient shadow, hover lift) */
+.clinical-card {
+  background-color: var(--surface);
+  border-radius: 28px;
+  box-shadow: var(--shadow-apple);
+  transition: transform 220ms ease, box-shadow 220ms ease;
+}
+
+.clinical-card-interactive:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-apple-hover);
+}
+
+/* Pill Button Hover Scale (200ms ease) */
+.apple-pill-btn {
+  border-radius: 999px;
+  transition: transform 200ms ease, background-color 200ms ease, color 200ms ease, box-shadow 200ms ease;
+}
+
+.apple-pill-btn:hover:not(:disabled) {
+  transform: scale(1.02);
+}
+
+/* Water glass fill transition */
+.water-fill-bar {
+  transition: height 240ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Soft Teal Hero Ambient Glow */
+@keyframes apple-ambient-drift {
+  0% {
+    transform: translate3d(-2%, -1%, 0) scale(1);
+    opacity: 0.78;
+  }
+  50% {
+    transform: translate3d(2%, 2%, 0) scale(1.05);
+    opacity: 0.96;
+  }
+  100% {
+    transform: translate3d(-2%, -1%, 0) scale(1);
+    opacity: 0.78;
+  }
+}
+
+.apple-ambient-glow {
+  animation: apple-ambient-drift 10s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+/* Scroll Reveal (24px rise, 600ms ease-out) */
+.apple-reveal {
+  opacity: 0;
+  transform: translate3d(0, 24px, 0);
+  transition: opacity 600ms ease-out, transform 600ms ease-out;
+  will-change: transform, opacity;
+}
+
+.apple-reveal-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+/* 2D Blood Cell Flow */
+@keyframes flow-smooth {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(380px); }
+}
+
+.anim-flowing .blood-cell {
+  animation: flow-smooth 2.6s infinite linear;
+}
+
+/* Weekly Streak Completion Pop */
+@keyframes streak-tile-pop {
+  0% {
+    transform: scale(0.92);
+  }
+  55% {
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.streak-tile-pop {
+  animation: streak-tile-pop 380ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Button tactile feedback */
+button,
+a[role="button"] {
+  transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+}
+
+button:active:not(:disabled) {
+  transform: scale(0.985);
+}
+
+/* Reduced Motion Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .apple-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
