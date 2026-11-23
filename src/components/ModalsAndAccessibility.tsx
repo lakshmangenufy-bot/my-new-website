@@ -672,8 +672,37 @@ export const ResourceModal: React.FC<{
 };
 
 /* ============================================================================
- * 100% DAILY MILESTONES CELEBRATION MODAL
+ * 100% DAILY MILESTONES CELEBRATION MODAL + SVG CONFETTI BURST
  * ========================================================================= */
+const CONFETTI_SHAPES: Array<{
+  cls: string;
+  shape: 'rect' | 'circle' | 'star';
+  color: string;
+}> = [
+  { cls: 'confetti-p1', shape: 'rect', color: '#1F6F63' },
+  { cls: 'confetti-p2', shape: 'circle', color: '#2DD4BF' },
+  { cls: 'confetti-p3', shape: 'star', color: '#F59E0B' },
+  { cls: 'confetti-p4', shape: 'rect', color: '#10B981' },
+  { cls: 'confetti-p5', shape: 'circle', color: '#38BDF8' },
+  { cls: 'confetti-p6', shape: 'star', color: '#F43F5E' },
+  { cls: 'confetti-p7', shape: 'rect', color: '#A78BFA' },
+  { cls: 'confetti-p8', shape: 'circle', color: '#10B981' },
+  { cls: 'confetti-p9', shape: 'rect', color: '#F59E0B' },
+  { cls: 'confetti-p10', shape: 'star', color: '#2DD4BF' },
+  { cls: 'confetti-p11', shape: 'circle', color: '#F43F5E' },
+  { cls: 'confetti-p12', shape: 'rect', color: '#38BDF8' },
+  { cls: 'confetti-p13', shape: 'star', color: '#10B981' },
+  { cls: 'confetti-p14', shape: 'circle', color: '#A78BFA' },
+  { cls: 'confetti-p15', shape: 'rect', color: '#2DD4BF' },
+  { cls: 'confetti-p16', shape: 'star', color: '#F59E0B' },
+  { cls: 'confetti-p17', shape: 'circle', color: '#1F6F63' },
+  { cls: 'confetti-p18', shape: 'rect', color: '#F43F5E' },
+  { cls: 'confetti-p19', shape: 'star', color: '#38BDF8' },
+  { cls: 'confetti-p20', shape: 'circle', color: '#F59E0B' },
+  { cls: 'confetti-p21', shape: 'rect', color: '#10B981' },
+  { cls: 'confetti-p22', shape: 'star', color: '#2DD4BF' },
+];
+
 export const CelebrationModal: React.FC<{
   open: boolean;
   lang: Language;
@@ -690,10 +719,57 @@ export const CelebrationModal: React.FC<{
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
-      className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 overflow-hidden"
     >
-      <div className="bg-white dark:bg-[#111A2B] rounded-[28px] border-2 border-[#1F6F63] dark:border-[#2DD4BF] max-w-md w-full p-7 text-center shadow-2xl space-y-5">
-        <div className="w-20 h-20 mx-auto rounded-3xl bg-[#E3F1ED] dark:bg-[#112A27] flex items-center justify-center text-4xl">
+      {/* Lightweight CSS + SVG Confetti Burst Overlay */}
+      <svg
+        viewBox="0 0 800 600"
+        preserveAspectRatio="xMidYMid slice"
+        aria-hidden="true"
+        className="confetti-canvas pointer-events-none fixed inset-0 w-full h-full z-[60]"
+      >
+        <g transform="translate(400 280)">
+          {CONFETTI_SHAPES.map((piece, idx) => {
+            if (piece.shape === 'circle') {
+              return (
+                <circle
+                  key={idx}
+                  cx="0"
+                  cy="0"
+                  r="6"
+                  fill={piece.color}
+                  className={`confetti-piece ${piece.cls}`}
+                />
+              );
+            }
+            if (piece.shape === 'star') {
+              return (
+                <polygon
+                  key={idx}
+                  points="0,-8 2.4,-2.4 8,-2.4 3.4,1.2 5,7 0,3.6 -5,7 -3.4,1.2 -8,-2.4 -2.4,-2.4"
+                  fill={piece.color}
+                  className={`confetti-piece ${piece.cls}`}
+                />
+              );
+            }
+            return (
+              <rect
+                key={idx}
+                x="-6"
+                y="-3.5"
+                width="12"
+                height="7"
+                rx="2"
+                fill={piece.color}
+                className={`confetti-piece ${piece.cls}`}
+              />
+            );
+          })}
+        </g>
+      </svg>
+
+      <div className="relative z-10 bg-white dark:bg-[#111A2B] rounded-[28px] border-2 border-[#1F6F63] dark:border-[#2DD4BF] max-w-md w-full p-7 text-center shadow-2xl space-y-5">
+        <div className="celebration-badge-pop w-20 h-20 mx-auto rounded-3xl bg-[#E3F1ED] dark:bg-[#112A27] flex items-center justify-center text-4xl">
           🏆
         </div>
         <div className="space-y-2">

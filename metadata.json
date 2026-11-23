@@ -1,6 +1,6 @@
 {
   "name": "StrokeCare AI",
   "description": "Accessible, senior-friendly daily recovery companion for stroke survivors with physiotherapy exercises, speech therapy, heart-healthy nutrition, and emergency SOS.",
-  "requestFramePermissions": ["geolocation"],
+  "requestFramePermissions": ["geolocation", "microphone"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

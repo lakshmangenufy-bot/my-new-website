@@ -394,130 +394,122 @@ export const SpeechSection: React.FC<{
         </button>
       </div>
 
-      {/* Sub-Panel A: Stacked Bilingual Word Cards */}
+      {/* Sub-Panel A: Compact Pro Bilingual Word Cards */}
       {speechTab === 'cards' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {SPEECH_WORDS.map((card) => {
             const practiced = practicedSpeechIds.includes(card.id);
-            const phoneticParts = card.phonetic.split(' · ');
+            const playId = `word-${card.id}-normal`;
+            const slowId = `word-${card.id}-slow`;
+            const isPlayActive =
+              speechState.activeId === playId &&
+              (speechState.isSpeaking || speechState.loading);
+            const isSlowActive =
+              speechState.activeId === slowId &&
+              (speechState.isSpeaking || speechState.loading);
+
             return (
               <article
                 key={card.id}
-                className={`rounded-[24px] p-6 flex flex-col justify-between gap-4 min-w-0 ${
+                className={`group rounded-[20px] p-4 sm:p-5 flex flex-col justify-between gap-3.5 min-w-0 border transition-all duration-200 ${
                   practiced
-                    ? 'bg-[#E3F1ED] dark:bg-[#112A27] ring-2 ring-[#1F6F63] dark:ring-[#2DD4BF]'
-                    : 'bg-[#F2F7F6] dark:bg-[#0B1220]'
+                    ? 'bg-[#EDF7F4] dark:bg-[#0E2521] border-[#1F6F63]/35 dark:border-[#2DD4BF]/40 shadow-[0_4px_16px_rgba(31,111,99,0.08)]'
+                    : 'bg-[#F8FAF9] dark:bg-[#0D1626] border-[#0F1F2E]/10 dark:border-white/10 shadow-[0_2px_10px_rgba(15,31,46,0.04)] hover:shadow-[0_10px_24px_rgba(15,31,46,0.08)] hover:-translate-y-0.5'
                 }`}
               >
-                <div className="flex flex-col gap-3 min-w-0">
-                  <div className="flex flex-wrap items-center justify-between gap-2 min-w-0">
-                    <span className="inline-flex items-center px-3 py-1 rounded-full bg-white dark:bg-[#111A2B] text-[0.875rem] font-semibold text-[#3A4753] dark:text-[#D3DFE9] min-w-0 [overflow-wrap:anywhere] [word-break:normal] [hyphens:none]">
-                      {isTa ? card.category_ta : card.category_en}
-                    </span>
-                    <span className="text-[0.875rem] font-normal text-[#3A4753] dark:text-[#D3DFE9] flex flex-wrap items-center gap-x-1.5 min-w-0">
-                      {phoneticParts.map((part, idx) => (
-                        <span key={part} className="whitespace-nowrap">
-                          {idx > 0 ? `· ${part}` : part}
-                        </span>
-                      ))}
-                    </span>
-                  </div>
-
-                  <div className="min-w-0 pt-1">
-                    <p className="text-[clamp(1.75rem,3vw+1rem,2.5rem)] leading-[1.5] py-[0.1em] font-semibold text-[#0F1F2E] dark:text-white min-w-0 [overflow-wrap:anywhere] [word-break:normal] [hyphens:none]">
-                      {card.word_ta}
-                    </p>
-                    <p className="text-[1.25rem] leading-[1.35] font-semibold text-[#1F6F63] dark:text-[#2DD4BF] min-w-0 [overflow-wrap:anywhere] [word-break:normal] [hyphens:none] mt-0.5">
-                      {card.word_en}
-                    </p>
-                  </div>
-
-                  <p className="text-[1.125rem] leading-[1.6] font-normal text-[#3A4753] dark:text-[#D3DFE9] min-w-0 [overflow-wrap:anywhere] [word-break:normal] [hyphens:none]">
-                    {isTa ? card.tip_ta : card.tip_en}
-                  </p>
-                </div>
-
-                <div className="flex flex-col gap-2.5 pt-1 min-w-0">
-                  <div className="flex flex-wrap gap-2.5 min-w-0">
-                    {(() => {
-                      const playId = `word-${card.id}-normal`;
-                      const slowId = `word-${card.id}-slow`;
-                      const isPlayActive =
-                        speechState.activeId === playId &&
-                        (speechState.isSpeaking || speechState.loading);
-                      const isSlowActive =
-                        speechState.activeId === slowId &&
-                        (speechState.isSpeaking || speechState.loading);
-                      return (
-                        <>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              speakBilingual(card.word_ta, card.word_en, lang, 0.96, {
-                                id: playId,
-                              })
-                            }
-                            aria-pressed={isPlayActive}
-                            className={`apple-pill-btn flex-1 min-w-fit min-h-[56px] px-4 py-2.5 text-[1.125rem] font-semibold inline-flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
-                              isPlayActive
-                                ? 'bg-[#1F6F63] text-white hc-primary-btn'
-                                : 'bg-white dark:bg-[#111A2B] text-[#0F1F2E] dark:text-white'
-                            }`}
-                          >
-                            {isPlayActive ? (
-                              <Square className="w-4 h-4 fill-current shrink-0" aria-hidden="true" />
-                            ) : (
-                              <Volume2 className="w-5 h-5 shrink-0 text-[#1F6F63] dark:text-[#2DD4BF]" aria-hidden="true" />
-                            )}
-                            <span>{isPlayActive ? (isTa ? 'நிறுத்து' : 'Stop') : isTa ? 'கேட்க' : 'Play'}</span>
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() =>
-                              speakBilingual(card.word_ta, card.word_en, lang, 0.75, {
-                                id: slowId,
-                              })
-                            }
-                            aria-pressed={isSlowActive}
-                            className={`apple-pill-btn flex-1 min-w-fit min-h-[56px] px-4 py-2.5 text-[1.125rem] font-semibold inline-flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
-                              isSlowActive
-                                ? 'bg-[#1F6F63] text-white hc-primary-btn'
-                                : 'bg-white dark:bg-[#111A2B] text-[#0F1F2E] dark:text-white'
-                            }`}
-                          >
-                            {isSlowActive ? (
-                              <Square className="w-4 h-4 fill-current shrink-0" aria-hidden="true" />
-                            ) : (
-                              <Volume2 className="w-5 h-5 shrink-0 text-[#1F6F63] dark:text-[#2DD4BF]" aria-hidden="true" />
-                            )}
-                            <span>{isSlowActive ? (isTa ? 'நிறுத்து' : 'Stop') : isTa ? 'மெதுவாக' : 'Slow'}</span>
-                          </button>
-                        </>
-                      );
-                    })()}
-                  </div>
+                {/* Compact Header: Eyebrow Category + Inline Practiced Toggle */}
+                <div className="flex items-center justify-between gap-2 min-w-0">
+                  <span className="text-[0.8125rem] font-semibold uppercase tracking-[0.06em] text-[#1F6F63] dark:text-[#2DD4BF] truncate">
+                    {isTa ? card.category_ta : card.category_en}
+                  </span>
 
                   <button
                     type="button"
                     aria-pressed={practiced}
                     onClick={() => onToggleSpeechPracticed(card.id)}
-                    className={`apple-pill-btn w-full min-h-[56px] px-4 py-2.5 text-[1.125rem] font-semibold inline-flex items-center justify-center gap-2 cursor-pointer min-w-0 [overflow-wrap:anywhere] ${
+                    className={`min-h-[44px] px-3 py-1 rounded-full text-[0.875rem] font-semibold inline-flex items-center gap-1.5 shrink-0 cursor-pointer transition-colors ${
                       practiced
                         ? 'bg-[#1F6F63] hover:bg-[#17574D] text-white hc-primary-btn'
-                        : 'bg-transparent border-2 border-[#1F6F63] dark:border-[#2DD4BF] text-[#1F6F63] dark:text-[#2DD4BF] hover:bg-[#E3F1ED] dark:hover:bg-[#112A27]'
+                        : 'bg-white dark:bg-[#111A2B] border border-[#0F1F2E]/15 dark:border-white/15 text-[#0F1F2E] dark:text-slate-200 hover:border-[#1F6F63] hover:text-[#1F6F63] dark:hover:text-[#2DD4BF]'
                     }`}
                   >
-                    {practiced && <Check className="w-5 h-5 shrink-0 stroke-[2.5]" aria-hidden="true" />}
+                    {practiced && <Check className="w-4 h-4 shrink-0 stroke-[2.5]" aria-hidden="true" />}
                     <span>
                       {practiced
                         ? isTa
-                          ? 'பயிற்சி முடிந்தது'
+                          ? 'முடிந்தது'
                           : 'Practiced'
                         : isTa
-                        ? 'பயிற்சி முடிந்ததாகக் குறி'
-                        : 'Mark as practiced'}
+                        ? 'குறிக்க'
+                        : 'Mark Done'}
                     </span>
+                  </button>
+                </div>
+
+                {/* Compact Word + Translation + Phonetics */}
+                <div className="space-y-1 min-w-0">
+                  <div className="flex flex-wrap items-baseline justify-between gap-x-2.5 gap-y-0.5 min-w-0">
+                    <h4 className="text-[1.5rem] sm:text-[1.625rem] leading-[1.35] font-semibold text-[#0F1F2E] dark:text-white [overflow-wrap:anywhere]">
+                      {card.word_ta}
+                    </h4>
+                    <span className="text-[1.125rem] font-semibold text-[#1F6F63] dark:text-[#2DD4BF] shrink-0">
+                      {card.word_en}
+                    </span>
+                  </div>
+                  <p className="text-[0.9375rem] font-medium text-[#3A4753] dark:text-[#D3DFE9] [overflow-wrap:anywhere]">
+                    {card.phonetic}
+                  </p>
+                </div>
+
+                {/* Subtle Left-Accent Articulation Tip */}
+                <p className="border-l-2 border-[#1F6F63]/35 dark:border-[#2DD4BF]/40 pl-3 text-[0.9375rem] leading-[1.45] font-normal text-[#3A4753] dark:text-[#D3DFE9] min-w-0 [overflow-wrap:anywhere]">
+                  {isTa ? card.tip_ta : card.tip_en}
+                </p>
+
+                {/* Unified Single-Row Audio Action Controls */}
+                <div className="grid grid-cols-2 gap-2 pt-0.5 min-w-0">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      speakBilingual(card.word_ta, card.word_en, lang, 0.96, {
+                        id: playId,
+                      })
+                    }
+                    aria-pressed={isPlayActive}
+                    className={`min-h-[48px] px-3.5 py-2 rounded-xl text-[1rem] font-semibold inline-flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer transition-colors ${
+                      isPlayActive
+                        ? 'bg-[#1F6F63] text-white hc-primary-btn'
+                        : 'bg-white dark:bg-[#111A2B] border border-[#0F1F2E]/12 dark:border-white/12 text-[#0F1F2E] dark:text-white hover:border-[#1F6F63]'
+                    }`}
+                  >
+                    {isPlayActive ? (
+                      <Square className="w-4 h-4 fill-current shrink-0" aria-hidden="true" />
+                    ) : (
+                      <Volume2 className="w-4 h-4 shrink-0 text-[#1F6F63] dark:text-[#2DD4BF]" aria-hidden="true" />
+                    )}
+                    <span>{isPlayActive ? (isTa ? 'நிறுத்து' : 'Stop') : isTa ? 'கேட்க' : 'Play'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      speakBilingual(card.word_ta, card.word_en, lang, 0.75, {
+                        id: slowId,
+                      })
+                    }
+                    aria-pressed={isSlowActive}
+                    className={`min-h-[48px] px-3.5 py-2 rounded-xl text-[1rem] font-semibold inline-flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer transition-colors ${
+                      isSlowActive
+                        ? 'bg-[#1F6F63] text-white hc-primary-btn'
+                        : 'bg-[#E3F1ED]/70 dark:bg-[#112A27] border border-[#1F6F63]/15 dark:border-[#2DD4BF]/20 text-[#0F1F2E] dark:text-white hover:bg-[#E3F1ED] dark:hover:bg-[#183935]'
+                    }`}
+                  >
+                    {isSlowActive ? (
+                      <Square className="w-4 h-4 fill-current shrink-0" aria-hidden="true" />
+                    ) : (
+                      <Volume2 className="w-4 h-4 shrink-0 text-[#1F6F63] dark:text-[#2DD4BF]" aria-hidden="true" />
+                    )}
+                    <span>{isSlowActive ? (isTa ? 'நிறுத்து' : 'Stop') : isTa ? 'மெதுவாக' : 'Slow'}</span>
                   </button>
                 </div>
               </article>

@@ -367,6 +367,166 @@ button:active:not(:disabled) {
   transform: scale(0.985);
 }
 
+/* Official Sign in with Google Button (.gsi-material-button) */
+.gsi-material-button {
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: #FFFFFF;
+  background-image: none;
+  border: 1px solid #747775;
+  border-radius: 999px;
+  box-sizing: border-box;
+  color: #1F1F1F;
+  cursor: pointer;
+  font-family: 'Roboto', 'Noto Sans', Arial, sans-serif;
+  font-size: 1rem;
+  min-height: 56px;
+  letter-spacing: 0.25px;
+  outline: none;
+  overflow: hidden;
+  padding: 0 24px 0 18px;
+  position: relative;
+  text-align: center;
+  transition: background-color 200ms ease, border-color 200ms ease, box-shadow 200ms ease, transform 200ms ease;
+  vertical-align: middle;
+  white-space: nowrap;
+  max-width: 400px;
+}
+
+.gsi-material-button .gsi-material-button-icon {
+  height: 22px;
+  margin-right: 12px;
+  min-width: 22px;
+  width: 22px;
+  flex-shrink: 0;
+}
+
+.gsi-material-button .gsi-material-button-content-wrapper {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  height: 100%;
+  justify-content: center;
+  position: relative;
+  width: 100%;
+}
+
+.gsi-material-button .gsi-material-button-contents {
+  flex-grow: 1;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gsi-material-button .gsi-material-button-state {
+  transition: opacity 200ms ease;
+  inset: 0;
+  opacity: 0;
+  position: absolute;
+}
+
+.gsi-material-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.gsi-material-button:not(:disabled):hover {
+  box-shadow: 0 2px 6px rgba(60, 64, 67, 0.28), 0 1px 2px rgba(60, 64, 67, 0.16);
+  transform: scale(1.015);
+}
+
+.gsi-material-button:not(:disabled):hover .gsi-material-button-state {
+  background-color: #303030;
+  opacity: 0.06;
+}
+
+html.dark .gsi-material-button {
+  background-color: #131314;
+  border-color: #8E918F;
+  color: #E3E3E3;
+}
+
+html.dark .gsi-material-button:not(:disabled):hover .gsi-material-button-state {
+  background-color: #FFFFFF;
+  opacity: 0.08;
+}
+
+/* Celebration Trophy Pop + Lightweight SVG Confetti Burst */
+@keyframes celebration-badge-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.72) rotate(-8deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.08) rotate(3deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.celebration-badge-pop {
+  animation: celebration-badge-pop 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes confetti-fall-burst {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(0.4);
+  }
+  12% {
+    opacity: 1;
+    transform: translate3d(calc(var(--cx, 0px) * 0.45), calc(var(--cy, -80px) * 0.85), 0)
+      rotate(calc(var(--cr, 180deg) * 0.35)) scale(1.05);
+  }
+  65% {
+    opacity: 0.95;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--cx, 0px), calc(var(--cy, 0px) + 340px), 0)
+      rotate(var(--cr, 360deg)) scale(0.85);
+  }
+}
+
+.confetti-piece {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+  animation: confetti-fall-burst 2600ms cubic-bezier(0.16, 0.88, 0.32, 1) var(--cd, 0ms) forwards;
+  will-change: transform, opacity;
+}
+
+.confetti-p1  { --cx: -210px; --cy: -140px; --cr: 320deg;  --cd: 20ms; }
+.confetti-p2  { --cx: -165px; --cy: -195px; --cr: -280deg; --cd: 60ms; }
+.confetti-p3  { --cx: -115px; --cy: -165px; --cr: 410deg;  --cd: 40ms; }
+.confetti-p4  { --cx: -65px;  --cy: -210px; --cr: -360deg; --cd: 90ms; }
+.confetti-p5  { --cx: -20px;  --cy: -185px; --cr: 260deg;  --cd: 30ms; }
+.confetti-p6  { --cx: 35px;   --cy: -215px; --cr: -310deg; --cd: 75ms; }
+.confetti-p7  { --cx: 85px;   --cy: -175px; --cr: 380deg;  --cd: 45ms; }
+.confetti-p8  { --cx: 140px;  --cy: -200px; --cr: -390deg; --cd: 110ms; }
+.confetti-p9  { --cx: 195px;  --cy: -150px; --cr: 295deg;  --cd: 55ms; }
+.confetti-p10 { --cx: 235px;  --cy: -115px; --cr: -250deg; --cd: 120ms; }
+.confetti-p11 { --cx: -245px; --cy: -90px;  --cr: -340deg; --cd: 130ms; }
+.confetti-p12 { --cx: -140px; --cy: -120px; --cr: 450deg;  --cd: 160ms; }
+.confetti-p13 { --cx: -45px;  --cy: -155px; --cr: -420deg; --cd: 145ms; }
+.confetti-p14 { --cx: 55px;   --cy: -145px; --cr: 330deg;  --cd: 175ms; }
+.confetti-p15 { --cx: 155px;  --cy: -125px; --cr: -310deg; --cd: 155ms; }
+.confetti-p16 { --cx: 250px;  --cy: -85px;  --cr: 390deg;  --cd: 190ms; }
+.confetti-p17 { --cx: -185px; --cy: -170px; --cr: 280deg;  --cd: 210ms; }
+.confetti-p18 { --cx: -90px;  --cy: -225px; --cr: -330deg; --cd: 225ms; }
+.confetti-p19 { --cx: 10px;   --cy: -230px; --cr: 400deg;  --cd: 205ms; }
+.confetti-p20 { --cx: 110px;  --cy: -220px; --cr: -290deg; --cd: 240ms; }
+.confetti-p21 { --cx: 215px;  --cy: -175px; --cr: 350deg;  --cd: 260ms; }
+.confetti-p22 { --cx: -260px; --cy: -125px; --cr: -370deg; --cd: 250ms; }
+
 /* Reduced Motion Accessibility */
 @media (prefers-reduced-motion: reduce) {
   html {
@@ -375,6 +535,9 @@ button:active:not(:disabled) {
   .apple-reveal {
     opacity: 1 !important;
     transform: none !important;
+  }
+  .confetti-canvas {
+    display: none !important;
   }
   *,
   *::before,

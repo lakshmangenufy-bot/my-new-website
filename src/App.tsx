@@ -4,6 +4,7 @@ import {
   CalendarCheck,
   Check,
   ChevronRight,
+  Download,
   Droplet,
   Dumbbell,
   Flame,
@@ -12,8 +13,10 @@ import {
   Menu,
   MessageSquare,
   Minus,
+  NotebookPen,
   PhoneCall,
   Pill,
+  Trash2,
   X,
 } from 'lucide-react';
 import {
@@ -52,6 +55,11 @@ const BrainExplorerSection = lazy(() =>
 const ChatbotSection = lazy(() =>
   import('./components/ChatbotSection').then((m) => ({
     default: m.ChatbotSection,
+  }))
+);
+const GoogleTasksSection = lazy(() =>
+  import('./components/GoogleTasksSection').then((m) => ({
+    default: m.GoogleTasksSection,
   }))
 );
 import { ExercisesSection } from './components/ExercisesSection';
@@ -93,6 +101,7 @@ interface AppState {
   medReminders: MedicationReminderSettings;
   activeDates: string[];
   dailyProgressByDate: Record<string, number>;
+  dailyNotesByDate: Record<string, { text: string; updatedAt: string }>;
 }
 
 const STORAGE_KEY = 'strokecare_pro_state_v1';
@@ -119,6 +128,7 @@ const DEFAULT_STATE: AppState = {
   },
   activeDates: [],
   dailyProgressByDate: {},
+  dailyNotesByDate: {},
 };
 
 function loadInitialState(): AppState {
@@ -175,6 +185,31 @@ function loadInitialState(): AppState {
       dailyProgressByDate:
         parsed.dailyProgressByDate && typeof parsed.dailyProgressByDate === 'object'
           ? parsed.dailyProgressByDate
+          : {},
+      dailyNotesByDate:
+        parsed.dailyNotesByDate && typeof parsed.dailyNotesByDate === 'object'
+          ? Object.fromEntries(
+              Object.entries(parsed.dailyNotesByDate)
+                .filter(
+                  ([k, v]) =>
+                    /^\d{4}-\d{2}-\d{2}$/.test(k) &&
+                    v &&
+                    typeof v === 'object' &&
+                    typeof (v as { text?: unknown }).text === 'string' &&
+                    (v as { text: string }).text.trim().length > 0
+                )
+                .slice(-60)
+                .map(([k, v]) => [
+                  k,
+                  {
+                    text: (v as { text: string }).text.slice(0, 240),
+                    updatedAt:
+                      typeof (v as { updatedAt?: unknown }).updatedAt === 'string'
+                        ? (v as { updatedAt: string }).updatedAt.slice(0, 32)
+                        : '',
+                  },
+                ])
+            )
           : {},
       medReminders: {
         ...DEFAULT_MED_REMINDER_SETTINGS,
@@ -328,6 +363,15 @@ export default function App() {
   const progressPct = Math.round((finishedMilestones / totalMilestones) * 100);
 
   const todayDateKey = getLocalDateKey();
+  const [selectedNoteDateKey, setSelectedNoteDateKey] = useState<string>(() => todayDateKey);
+  const [noteDraft, setNoteDraft] = useState<string>(
+    () => state.dailyNotesByDate[todayDateKey]?.text ?? ''
+  );
+
+  useEffect(() => {
+    setNoteDraft(state.dailyNotesByDate[selectedNoteDateKey]?.text ?? '');
+  }, [selectedNoteDateKey, state.dailyNotesByDate]);
+
   useEffect(() => {
     setState((prev) => {
       if (prev.dailyProgressByDate[todayDateKey] === progressPct) return prev;
@@ -674,6 +718,113 @@ export default function App() {
     });
   };
 
+  const handleSaveDailyNote = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = noteDraft.trim().slice(0, 240);
+    const targetKey = selectedNoteDateKey || todayDateKey;
+    const savedAt = getCurrentTimeLabel();
+
+    setState((prev) => {
+      const nextNotes = { ...prev.dailyNotesByDate };
+      if (!trimmed) {
+        delete nextNotes[targetKey];
+      } else {
+        nextNotes[targetKey] = { text: trimmed, updatedAt: savedAt };
+      }
+      const retained = Object.fromEntries(Object.entries(nextNotes).slice(-60));
+      return { ...prev, dailyNotesByDate: retained };
+    });
+
+    if (trimmed) {
+      playSoftTone(660, 0.15);
+      notify('இன்றைய குறிப்பு சேமிக்கப்பட்டது!', 'Personal note saved!', 'success');
+    } else {
+      notify('குறிப்பு அழிக்கப்பட்டது', 'Personal note cleared', 'teal');
+    }
+  };
+
+  const handleClearDailyNote = () => {
+    const targetKey = selectedNoteDateKey || todayDateKey;
+    setNoteDraft('');
+    setState((prev) => {
+      if (!prev.dailyNotesByDate[targetKey]) return prev;
+      const nextNotes = { ...prev.dailyNotesByDate };
+      delete nextNotes[targetKey];
+      return { ...prev, dailyNotesByDate: nextNotes };
+    });
+    notify('குறிப்பு அழிக்கப்பட்டது', 'Personal note cleared', 'teal');
+  };
+
+  const handleDownloadRecoverySummary = () => {
+    const summaryPayload = {
+      app: 'StrokeCare AI',
+      exportedAt: new Date().toISOString(),
+      dateKey: todayDateKey,
+      profile: {
+        name: state.profileName.trim() || null,
+        recoveryFocus: state.recoveryFocus,
+        language: state.language,
+      },
+      dailyProgress: {
+        completionPercent: progressPct,
+        milestonesCompleted: finishedMilestones,
+        totalMilestones,
+        exercises: {
+          completed: exDone,
+          total: 3,
+          items: state.exercises,
+        },
+        medications: {
+          taken: medDone,
+          total: 4,
+          items: state.medications,
+        },
+        hydration: {
+          glassesConsumed: state.waterCount,
+          dailyGoal: 8,
+          goalMet: waterGoalMet === 1,
+        },
+        speechPractice: {
+          practicedCount: state.practicedSpeechIds.length,
+          totalWords: SPEECH_WORDS.length,
+          goalMet: speechGoalMet === 1,
+          practicedWordIds: state.practicedSpeechIds,
+        },
+      },
+      weeklyProgressByDate: state.dailyProgressByDate,
+      activeDates: state.activeDates,
+      notes: {
+        todayNote: state.dailyNotesByDate[todayDateKey] ?? null,
+        notesByDate: state.dailyNotesByDate,
+      },
+      activityLogs: {
+        exercises: state.exerciseHistory,
+        medications: state.medicationHistory,
+        hydration: state.waterHistory,
+      },
+    };
+
+    const jsonString = JSON.stringify(summaryPayload, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    try {
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `strokecare-recovery-summary-${todayDateKey}.json`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      playSoftTone(660, 0.14);
+      notify(
+        'மீட்பு சுருக்க JSON கோப்பு பதிவிறக்கம் செய்யப்பட்டது!',
+        'Recovery summary downloaded as JSON!',
+        'success'
+      );
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  };
+
   const encouragementText = useMemo(() => {
     if (progressPct === 0) {
       return isTa
@@ -716,6 +867,7 @@ export default function App() {
   const navItems = [
     { href: '#features-bento', ta: 'சிறப்புகள்', en: 'Overview' },
     { href: '#dashboard', ta: 'தினசரி நிலை', en: 'Progress' },
+    { href: '#tasks-section', ta: 'பணிகள்', en: 'Tasks' },
     { href: '#ai-companion', ta: '3D AI உதவி', en: '3D AI Chat' },
     { href: '#brain-explorer', ta: '3D மூளை', en: '3D Brain' },
     { href: '#physio-section', ta: 'பயிற்சி & மருந்து', en: 'Daily Care' },
@@ -865,6 +1017,7 @@ export default function App() {
               { href: '#medicine-section', ta: 'மருந்து அட்டவணை', en: 'Medications' },
               { href: '#hydration-section', ta: 'தண்ணீர் & உணவு', en: 'Hydration & Diet' },
               { href: '#speech-section', ta: 'பேச்சுப் பயிற்சி', en: 'Speech Practice' },
+              { href: '#tasks-section', ta: 'Google Tasks பணிகள்', en: 'Google Tasks' },
               { href: '#resources-section', ta: 'வழிகாட்டிகள்', en: 'Patient Guides' },
             ].map((item) => (
               <a
@@ -987,6 +1140,15 @@ export default function App() {
                     ? `${totalMilestones}-ல் ${finishedMilestones} இலக்குகள் முடிந்தன`
                     : `${finishedMilestones} of ${totalMilestones} goals completed`}
                 </p>
+
+                <button
+                  type="button"
+                  onClick={handleDownloadRecoverySummary}
+                  className="apple-pill-btn w-full min-h-[56px] px-5 py-3 border-2 border-[#1F6F63] dark:border-[#2DD4BF] bg-[#E3F1ED]/70 dark:bg-[#112A27]/80 hover:bg-[#E3F1ED] dark:hover:bg-[#112A27] text-[1.0625rem] font-semibold text-[#1F6F63] dark:text-[#2DD4BF] inline-flex items-center justify-center gap-2 cursor-pointer [overflow-wrap:anywhere] text-center"
+                >
+                  <Download className="w-5 h-5 shrink-0" aria-hidden="true" />
+                  <span>{isTa ? 'மீட்பு சுருக்கத்தைப் பதிவிறக்கு (JSON)' : 'Download Recovery Summary'}</span>
+                </button>
               </div>
 
               {/* Right Column: Overview Heading + Edit Profile + Weekly Activity */}
@@ -1043,19 +1205,28 @@ export default function App() {
                         const miniCircumference = 2 * Math.PI * miniRadius;
                         const miniOffset = miniCircumference - (dayPct / 100) * miniCircumference;
 
+                        const hasSavedNote = Boolean(state.dailyNotesByDate[day.dateKey]?.text);
+                        const isSelectedNoteDay = selectedNoteDateKey === day.dateKey;
+
                         const tileAriaLabel = day.isFuture
                           ? isTa
                             ? `${day.fullLabel}, வரவிருக்கும் நாள்`
                             : `${day.fullLabel}, upcoming`
                           : isTa
-                          ? `${day.fullLabel}, ${dayPct}% நிறைவு`
-                          : `${day.fullLabel}, ${dayPct}% complete`;
+                          ? `${day.fullLabel}, ${dayPct}% நிறைவு${hasSavedNote ? ', குறிப்பு உள்ளது' : ''}`
+                          : `${day.fullLabel}, ${dayPct}% complete${hasSavedNote ? ', note saved' : ''}`;
 
                         return (
-                          <div
+                          <button
                             key={day.dateKey}
+                            type="button"
+                            disabled={day.isFuture}
+                            onClick={() => setSelectedNoteDateKey(day.dateKey)}
                             aria-label={tileAriaLabel}
-                            className={`min-w-[48px] min-h-[72px] px-1 py-2 rounded-2xl flex flex-col items-center justify-between gap-1.5 text-center transition-colors duration-200 ${
+                            aria-pressed={isSelectedNoteDay}
+                            className={`relative min-w-[48px] min-h-[72px] px-1 py-2 rounded-2xl flex flex-col items-center justify-between gap-1.5 text-center transition-colors duration-200 ${
+                              day.isFuture ? 'cursor-default' : 'cursor-pointer'
+                            } ${
                               tileState === 'done'
                                 ? 'streak-tile-pop bg-[#E3F1ED] dark:bg-[#112A27] text-[#0F1F2E] dark:text-white'
                                 : tileState === 'partial'
@@ -1063,8 +1234,18 @@ export default function App() {
                                 : tileState === 'missed'
                                 ? 'bg-[#F2F7F6] dark:bg-[#0B1220] text-[#3A4753] dark:text-[#D3DFE9]'
                                 : 'bg-[#F2F7F6]/60 dark:bg-[#0B1220]/50 text-[#3A4753] dark:text-slate-400 opacity-55'
+                            } ${
+                              isSelectedNoteDay && !day.isFuture
+                                ? 'outline-2 outline-offset-2 outline-[#1F6F63] dark:outline-[#2DD4BF]'
+                                : ''
                             }`}
                           >
+                            {hasSavedNote && (
+                              <span
+                                aria-hidden="true"
+                                className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#1F6F63] dark:bg-[#2DD4BF]"
+                              />
+                            )}
                             <span className="text-[0.875rem] font-medium leading-tight max-w-full [overflow-wrap:anywhere]">
                               {day.shortLabel}
                             </span>
@@ -1110,12 +1291,118 @@ export default function App() {
                             {tileState === 'future' && (
                               <span className="w-8 h-8 rounded-full border border-dashed border-[#CBD5E1] dark:border-slate-600 flex items-center justify-center shrink-0" />
                             )}
-                          </div>
+                          </button>
                         );
                       })}
                     </div>
                   </div>
                 </div>
+
+                {/* Personal Daily Note Card ("How I Felt") */}
+                {(() => {
+                  const activeNoteObj = state.dailyNotesByDate[selectedNoteDateKey];
+                  const isViewingToday = selectedNoteDateKey === todayDateKey;
+                  const selectedDayMeta = currentWeekDays.find((d) => d.dateKey === selectedNoteDateKey);
+                  const isDirty = noteDraft.trim() !== (activeNoteObj?.text ?? '').trim();
+
+                  return (
+                    <form
+                      onSubmit={handleSaveDailyNote}
+                      className="clinical-card hc-card p-6 sm:p-8 space-y-4 min-w-0"
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2 min-w-0">
+                        <label
+                          htmlFor="daily-personal-note-input"
+                          className="flex items-center gap-2 text-[1.125rem] font-semibold text-[#0F1F2E] dark:text-white min-w-0 [overflow-wrap:anywhere] cursor-pointer"
+                        >
+                          <NotebookPen className="w-5 h-5 shrink-0 text-[#1F6F63] dark:text-[#2DD4BF]" aria-hidden="true" />
+                          <span>
+                            {isViewingToday
+                              ? isTa
+                                ? 'இன்று நான் உணர்ந்த விதம் (குறிப்பு)'
+                                : 'How I Felt Today (Personal Note)'
+                              : isTa
+                              ? `${selectedDayMeta?.fullLabel || selectedNoteDateKey} குறிப்பு`
+                              : `Personal Note · ${selectedDayMeta?.fullLabel || selectedNoteDateKey}`}
+                          </span>
+                        </label>
+
+                        <div className="flex flex-wrap items-center gap-2">
+                          {activeNoteObj?.updatedAt && !isDirty && (
+                            <span className="tabular-nums text-[0.9375rem] font-semibold text-[#1F6F63] dark:text-[#2DD4BF]">
+                              {isTa ? `சேமிக்கப்பட்டது · ${activeNoteObj.updatedAt}` : `Saved · ${activeNoteObj.updatedAt}`}
+                            </span>
+                          )}
+                          {!isViewingToday && (
+                            <button
+                              type="button"
+                              onClick={() => setSelectedNoteDateKey(todayDateKey)}
+                              className="min-h-[40px] px-3 py-1 rounded-full bg-[#E3F1ED] dark:bg-[#112A27] text-[0.9375rem] font-semibold text-[#1F6F63] dark:text-[#2DD4BF] hover:underline cursor-pointer"
+                            >
+                              {isTa ? 'இன்றைக்குச் செல்' : 'Back to Today'}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      <p className="text-[1.0625rem] text-[#3A4753] dark:text-[#D3DFE9] leading-relaxed">
+                        {isTa
+                          ? 'இன்று உங்கள் உடல்நலம், சோர்வு அல்லது மனநிலை எப்படி இருந்தது என்பதைப் பின்னர் நினைவுகூர ஒரு சிறிய குறிப்பைச் சேர்க்கவும்.'
+                          : 'Add a short personal note about how your energy, balance, or mood felt so you can look back anytime.'}
+                      </p>
+
+                      <textarea
+                        id="daily-personal-note-input"
+                        rows={3}
+                        maxLength={240}
+                        value={noteDraft}
+                        onChange={(e) => setNoteDraft(e.target.value)}
+                        placeholder={
+                          isTa
+                            ? 'எ.கா. காலை உணவுக்குப் பிறகு 10 நிமிடம் மெதுவாக நடந்தேன், நன்றாக உணர்ந்தேன்.'
+                            : 'e.g., Walked steadily for 10 minutes after breakfast and felt calm today.'
+                        }
+                        className="w-full min-h-[96px] px-4 py-3 rounded-2xl border-2 border-[var(--border-subtle)] bg-[#FBFBFD] dark:bg-[#0B1220] text-[1.125rem] text-[#0F1F2E] dark:text-white leading-relaxed"
+                      />
+
+                      <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+                        <span className="tabular-nums text-[0.9375rem] font-medium text-[#3A4753] dark:text-[#D3DFE9]">
+                          {noteDraft.length} / 240
+                        </span>
+
+                        <div className="flex flex-wrap items-center gap-2.5">
+                          {(noteDraft.length > 0 || Boolean(activeNoteObj)) && (
+                            <button
+                              type="button"
+                              onClick={handleClearDailyNote}
+                              className="apple-pill-btn min-h-[56px] px-5 py-2 border-2 border-[#0F1F2E]/15 dark:border-white/20 bg-transparent hover:bg-black/5 dark:hover:bg-white/10 text-[1.125rem] font-semibold text-[#0F1F2E] dark:text-white inline-flex items-center gap-2 cursor-pointer"
+                            >
+                              <Trash2 className="w-4 h-4" aria-hidden="true" />
+                              <span>{isTa ? 'அழி' : 'Clear'}</span>
+                            </button>
+                          )}
+
+                          <button
+                            type="submit"
+                            disabled={!isDirty && Boolean(activeNoteObj)}
+                            className="apple-pill-btn min-h-[56px] px-6 py-2 bg-[#1F6F63] hover:bg-[#17574D] disabled:opacity-55 text-white text-[1.125rem] font-semibold inline-flex items-center gap-2 cursor-pointer hc-primary-btn"
+                          >
+                            <Check className="w-5 h-5" aria-hidden="true" />
+                            <span>
+                              {!isDirty && activeNoteObj
+                                ? isTa
+                                  ? 'சேமிக்கப்பட்டது'
+                                  : 'Saved'
+                                : isTa
+                                ? 'குறிப்பைச் சேமி'
+                                : 'Save Note'}
+                            </span>
+                          </button>
+                        </div>
+                      </div>
+                    </form>
+                  );
+                })()}
               </div>
             </div>
 
@@ -1500,6 +1787,24 @@ export default function App() {
           </div>
         </section>
 
+        {/* 08B. GOOGLE TASKS RECOVERY PLANNER (#F2F7F6) */}
+        <Suspense
+          fallback={
+            <section
+              id="tasks-section"
+              className="w-full bg-[#F2F7F6] dark:bg-[#0B1220] apple-section-pad"
+            >
+              <div className="max-w-[1100px] mx-auto px-4 sm:px-6 text-center py-16">
+                <p className="text-[1.125rem] text-[#3A4753] dark:text-[#D3DFE9]">
+                  {isTa ? 'Google Tasks பகுதி தயாராகிறது...' : 'Preparing Google Tasks planner...'}
+                </p>
+              </div>
+            </section>
+          }
+        >
+          <GoogleTasksSection lang={state.language} onNotify={notify} />
+        </Suspense>
+
         {/* 09. 3D AI CARE COMPANION CHATBOT (#0B1220) */}
         <Suspense
           fallback={
@@ -1580,6 +1885,9 @@ export default function App() {
                 <a href="#dashboard" className="hover:underline">
                   {isTa ? 'முன்னேற்றம்' : 'Progress'}
                 </a>
+                <a href="#tasks-section" className="hover:underline">
+                  {isTa ? 'பணிகள்' : 'Tasks'}
+                </a>
                 <a href="#faq-section" className="hover:underline">
                   {isTa ? 'கேள்விகள்' : 'FAQ'}
                 </a>
@@ -1629,14 +1937,27 @@ export default function App() {
                 </li>
               </ul>
 
-              <button
-                type="button"
-                onClick={handleToggleLanguage}
-                className="apple-pill-btn min-h-[56px] mt-2 px-5 py-2.5 bg-[#1F6F63] hover:bg-[#17574D] text-white text-[1rem] font-semibold inline-flex items-center gap-2 cursor-pointer hc-primary-btn"
-              >
-                <Languages className="w-5 h-5" aria-hidden="true" />
-                <span>{isTa ? 'Switch to English' : 'தமிழுக்கு மாற்றவும்'}</span>
-              </button>
+              <div className="flex flex-wrap items-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={handleToggleLanguage}
+                  className="apple-pill-btn min-h-[56px] px-5 py-2.5 bg-[#1F6F63] hover:bg-[#17574D] text-white text-[1rem] font-semibold inline-flex items-center gap-2 cursor-pointer hc-primary-btn"
+                >
+                  <Languages className="w-5 h-5" aria-hidden="true" />
+                  <span>{isTa ? 'Switch to English' : 'தமிழுக்கு மாற்றவும்'}</span>
+                </button>
+
+                {import.meta.env.DEV && (
+                  <a
+                    href="/api/download-project.zip"
+                    download="strokecare-ai-project.zip"
+                    className="apple-pill-btn min-h-[56px] px-5 py-2.5 border-2 border-[#1F6F63] dark:border-[#2DD4BF] bg-transparent hover:bg-[#E3F1ED] dark:hover:bg-[#112A27] text-[#1F6F63] dark:text-[#2DD4BF] text-[1rem] font-semibold inline-flex items-center gap-2"
+                  >
+                    <Download className="w-5 h-5" aria-hidden="true" />
+                    <span>{isTa ? 'திட்டத்தை ZIP-ஆக பதிவிறக்கு' : 'Download Project (.zip)'}</span>
+                  </a>
+                )}
+              </div>
             </div>
           </div>
 
