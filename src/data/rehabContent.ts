@@ -1,8 +1,8 @@
 import { MedicationId } from '../med-reminders';
-import fastRecognitionImg from '../assets/images/resource_fast_recognition_1794675103675.jpg';
-import brainNutritionImg from '../assets/images/resource_brain_nutrition_1794675104330.jpg';
-import aboutRehabCareImg from '../assets/images/about_rehab_care_1794675104331.jpg';
-import speechTherapyImg from '../assets/images/speech_therapy_practice_1793271458638.jpg';
+import fastRecognitionImg from '../assets/images/resource_fast_recognition_1794675103675.webp';
+import brainNutritionImg from '../assets/images/resource_brain_nutrition_1794675104330.webp';
+import aboutRehabCareImg from '../assets/images/about_rehab_care_1794675104331.webp';
+import speechTherapyImg from '../assets/images/speech_therapy_practice_1793271458638.webp';
 
 export type Language = 'ta' | 'en';
 export type ThemeMode = 'light' | 'dark';

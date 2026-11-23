@@ -326,6 +326,7 @@ export const SpeechSection: React.FC<{
             <button
               type="button"
               onClick={() => setSpeechRate('slow')}
+              aria-pressed={speechRate === 'slow'}
               className={`apple-pill-btn min-h-[56px] px-5 py-2 text-[1.125rem] font-semibold cursor-pointer ${
                 speechRate === 'slow'
                   ? 'bg-[#1F6F63] text-white hc-primary-btn'
@@ -337,6 +338,7 @@ export const SpeechSection: React.FC<{
             <button
               type="button"
               onClick={() => setSpeechRate('normal')}
+              aria-pressed={speechRate === 'normal'}
               className={`apple-pill-btn min-h-[56px] px-5 py-2 text-[1.125rem] font-semibold cursor-pointer ${
                 speechRate === 'normal'
                   ? 'bg-[#1F6F63] text-white hc-primary-btn'

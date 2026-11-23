@@ -231,6 +231,9 @@ export const SosModal: React.FC<{
       role="dialog"
       aria-modal="true"
       aria-labelledby="sosModalTitle"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
       className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4"
     >
       <div className="bg-white dark:bg-[#111A2B] rounded-[28px] border-2 border-[#C81E1E] max-w-md w-full p-6 sm:p-8 shadow-2xl space-y-5">
@@ -349,6 +352,9 @@ export const MedAlertModal: React.FC<{
       role="alertdialog"
       aria-modal="true"
       aria-labelledby="medAlertModalTitle"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
       className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4"
     >
       <div className="bg-white dark:bg-[#111A2B] rounded-[28px] border-2 border-[#1F6F63] dark:border-[#2DD4BF] max-w-md w-full p-6 sm:p-8 shadow-2xl space-y-5">
@@ -454,6 +460,9 @@ export const PersonalizeModal: React.FC<{
       role="dialog"
       aria-modal="true"
       aria-labelledby="personalizeTitle"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
       className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
     >
       <div className="bg-white dark:bg-[#111A2B] rounded-[28px] max-w-md w-full p-6 sm:p-8 shadow-2xl space-y-5">
@@ -608,6 +617,9 @@ export const ResourceModal: React.FC<{
       role="dialog"
       aria-modal="true"
       aria-labelledby="resReaderTitle"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
       className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4"
     >
       <div className="bg-white dark:bg-[#111A2B] rounded-[28px] max-w-xl w-full p-6 sm:p-8 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
@@ -675,6 +687,9 @@ export const CelebrationModal: React.FC<{
       role="dialog"
       aria-modal="true"
       aria-labelledby="celebrateTitle"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
       className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4"
     >
       <div className="bg-white dark:bg-[#111A2B] rounded-[28px] border-2 border-[#1F6F63] dark:border-[#2DD4BF] max-w-md w-full p-7 text-center shadow-2xl space-y-5">
@@ -749,6 +764,9 @@ export const LegalModal: React.FC<{
       role="dialog"
       aria-modal="true"
       aria-labelledby="legalDialogTitle"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
       className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4"
     >
       <div className="bg-white dark:bg-[#111A2B] rounded-[28px] max-w-md w-full p-6 sm:p-8 shadow-2xl space-y-4">

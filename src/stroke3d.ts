@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { GLTFLoader, GLTF } from 'three/addons/loaders/GLTFLoader.js';
-import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+import type { GLTF } from 'three/addons/loaders/GLTFLoader.js';
+import type { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import {
   buildSculptedBrainGeometry,
   createBrainTextures,
@@ -1222,86 +1222,100 @@ export function initStroke3D(
 
   if (isCustomGlbUrl) {
     options?.onLoadProgress?.(10, 'gltf');
-    dracoLoader = new DRACOLoader();
-    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/');
-    const gltfLoader = new GLTFLoader();
-    gltfLoader.setDRACOLoader(dracoLoader);
-
-    gltfLoader.load(
-      BRAIN_MODEL_URL,
-      (gltf: GLTF) => {
+    void (async () => {
+      try {
+        const [{ GLTFLoader }, { DRACOLoader }] = await Promise.all([
+          import('three/addons/loaders/GLTFLoader.js'),
+          import('three/addons/loaders/DRACOLoader.js'),
+        ]);
         if (disposed) return;
-        const model = gltf.scene;
 
-        // Normalize bounding size to match camera framing (~2.8 width)
-        const box = new THREE.Box3().setFromObject(model);
-        const center = box.getCenter(new THREE.Vector3());
-        const size = box.getSize(new THREE.Vector3());
-        const maxDim = Math.max(size.x, size.y, size.z) || 1;
-        const scaleFactor = 2.8 / maxDim;
-        model.position.sub(center).multiplyScalar(scaleFactor);
-        model.scale.setScalar(scaleFactor);
+        dracoLoader = new DRACOLoader();
+        dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/');
+        const gltfLoader = new GLTFLoader();
+        gltfLoader.setDRACOLoader(dracoLoader);
 
-        model.traverse((child) => {
-          if ((child as THREE.Mesh).isMesh) {
-            const mesh = child as THREE.Mesh;
-            createdGeometries.push(mesh.geometry);
-            const rawMat = mesh.material;
-            // Upgrade basic untextured mesh materials to realistic moist tissue MeshPhysicalMaterial
-            if (Array.isArray(rawMat)) {
-              rawMat.forEach((m) => createdMaterials.push(m));
-            } else if (rawMat) {
-              createdMaterials.push(rawMat);
-              if (!(rawMat as THREE.MeshPhysicalMaterial).map) {
-                const phys = makeCortexMaterial(0xd9b7a8);
-                mesh.material = phys;
+        gltfLoader.load(
+          BRAIN_MODEL_URL,
+          (gltf: GLTF) => {
+            if (disposed) return;
+            const model = gltf.scene;
+
+            // Normalize bounding size to match camera framing (~2.8 width)
+            const box = new THREE.Box3().setFromObject(model);
+            const center = box.getCenter(new THREE.Vector3());
+            const size = box.getSize(new THREE.Vector3());
+            const maxDim = Math.max(size.x, size.y, size.z) || 1;
+            const scaleFactor = 2.8 / maxDim;
+            model.position.sub(center).multiplyScalar(scaleFactor);
+            model.scale.setScalar(scaleFactor);
+
+            model.traverse((child) => {
+              if ((child as THREE.Mesh).isMesh) {
+                const mesh = child as THREE.Mesh;
+                createdGeometries.push(mesh.geometry);
+                const rawMat = mesh.material;
+                // Upgrade basic untextured mesh materials to realistic moist tissue MeshPhysicalMaterial
+                if (Array.isArray(rawMat)) {
+                  rawMat.forEach((m) => createdMaterials.push(m));
+                } else if (rawMat) {
+                  createdMaterials.push(rawMat);
+                  if (!(rawMat as THREE.MeshPhysicalMaterial).map) {
+                    const phys = makeCortexMaterial(0xd9b7a8);
+                    mesh.material = phys;
+                  }
+                }
+
+                const mappedId =
+                  resolveRegionIdFromMeshName(mesh.name) || 'Brain-cerebral_hemisphere-left';
+                const cleanName = mesh.name || `gltf_part_${interactiveMeshList.length}`;
+                registerMesh(cleanName, mesh, mappedId);
+
+                // Track left/right half for Split Hemispheres slider
+                const worldBox = new THREE.Box3().setFromObject(mesh);
+                const meshCenter = worldBox.getCenter(new THREE.Vector3());
+                if (mesh.name.toLowerCase().includes('left') || meshCenter.x < -0.1) {
+                  mesh.userData.baseX = mesh.position.x;
+                  gltfSplitLeftMeshes.push(mesh);
+                } else if (mesh.name.toLowerCase().includes('right') || meshCenter.x > 0.1) {
+                  mesh.userData.baseX = mesh.position.x;
+                  gltfSplitRightMeshes.push(mesh);
+                }
               }
-            }
+            });
 
-            const mappedId =
-              resolveRegionIdFromMeshName(mesh.name) || 'Brain-cerebral_hemisphere-left';
-            const cleanName = mesh.name || `gltf_part_${interactiveMeshList.length}`;
-            registerMesh(cleanName, mesh, mappedId);
-
-            // Track left/right half for Split Hemispheres slider
-            const worldBox = new THREE.Box3().setFromObject(mesh);
-            const meshCenter = worldBox.getCenter(new THREE.Vector3());
-            if (mesh.name.toLowerCase().includes('left') || meshCenter.x < -0.1) {
-              mesh.userData.baseX = mesh.position.x;
-              gltfSplitLeftMeshes.push(mesh);
-            } else if (mesh.name.toLowerCase().includes('right') || meshCenter.x > 0.1) {
-              mesh.userData.baseX = mesh.position.x;
-              gltfSplitRightMeshes.push(mesh);
-            }
+            gltfAtlasGroup.add(model);
+            applyHighlightAndXray();
+            options?.onModelCreditChange?.({
+              sourceMode: 'gltf',
+              title_en: (gltf.asset?.generator as string) || 'External Anatomical Brain Mesh (GLB)',
+              title_ta: 'வெளிப்புற முப்பரிமாண மூளை மாதிரி (GLB)',
+              license_en: (gltf.asset?.copyright as string) || 'CC-BY / CC0 Anatomical Model',
+              license_ta: 'CC-BY / CC0 திறந்த மருத்துவ மாதிரி',
+            });
+            options?.onLoadProgress?.(100, 'gltf');
+          },
+          (progress) => {
+            if (disposed) return;
+            const pct =
+              progress.total > 0
+                ? Math.min(95, Math.round((progress.loaded / progress.total) * 100))
+                : 45;
+            options?.onLoadProgress?.(pct, 'gltf');
+          },
+          () => {
+            if (disposed) return;
+            // GLB failed -> fallback smoothly to procedural brain
+            buildProceduralBrain();
+            applyHighlightAndXray();
           }
-        });
-
-        gltfAtlasGroup.add(model);
-        applyHighlightAndXray();
-        options?.onModelCreditChange?.({
-          sourceMode: 'gltf',
-          title_en: (gltf.asset?.generator as string) || 'External Anatomical Brain Mesh (GLB)',
-          title_ta: 'வெளிப்புற முப்பரிமாண மூளை மாதிரி (GLB)',
-          license_en: (gltf.asset?.copyright as string) || 'CC-BY / CC0 Anatomical Model',
-          license_ta: 'CC-BY / CC0 திறந்த மருத்துவ மாதிரி',
-        });
-        options?.onLoadProgress?.(100, 'gltf');
-      },
-      (progress) => {
+        );
+      } catch {
         if (disposed) return;
-        const pct =
-          progress.total > 0
-            ? Math.min(95, Math.round((progress.loaded / progress.total) * 100))
-            : 45;
-        options?.onLoadProgress?.(pct, 'gltf');
-      },
-      () => {
-        if (disposed) return;
-        // GLB failed -> fallback smoothly to procedural brain
         buildProceduralBrain();
         applyHighlightAndXray();
       }
-    );
+    })();
   } else {
     // Stage progress cleanly across two frames so skeleton loader % is visible & responsive
     options?.onLoadProgress?.(35, 'procedural');

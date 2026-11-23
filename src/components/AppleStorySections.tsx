@@ -16,8 +16,8 @@ import {
 } from 'lucide-react';
 import { Language, RESOURCE_ARTICLES, ResourceId } from '../data/rehabContent';
 import { HeroBrainPreviewController, initHeroBrainPreview } from '../stroke3d';
-import heroBrainPhoto from '../assets/images/hero_brain_ai_1794675103132.jpg';
-import strokeHeroPhoto from '../assets/images/stroke_recovery_hero_1793271457579.jpg';
+import heroBrainPhoto from '../assets/images/hero_brain_ai_1794675103132.webp';
+import strokeHeroPhoto from '../assets/images/stroke_recovery_hero_1793271457579.webp';
 
 /* ============================================================================
  * PERFORMANT SCROLL REVEAL & ANIMATED COUNT-UP PRIMITIVES
@@ -274,6 +274,7 @@ export const AppleHeroSection: React.FC<{
                     ? 'மனித மூளையின் 3D நரம்பியல் காட்சி'
                     : '3D human brain visualization'
                 }
+                decoding="async"
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover object-center"
               />
@@ -373,6 +374,8 @@ export const FeaturesBentoSection: React.FC<{
                 <img
                   src={heroBrainPhoto}
                   alt={isTa ? '3D மனித மூளை மாதிரி' : 'Interactive 3D human brain visualization'}
+                  loading="lazy"
+                  decoding="async"
                   referrerPolicy="no-referrer"
                   className="w-full h-full object-cover"
                 />
@@ -511,6 +514,8 @@ export const FeaturesBentoSection: React.FC<{
                 <img
                   src={strokeHeroPhoto}
                   alt={isTa ? 'பக்கவாத மீட்புப் பராமரிப்பு' : 'Guided home stroke rehabilitation support'}
+                  loading="lazy"
+                  decoding="async"
                   referrerPolicy="no-referrer"
                   className="w-full h-full object-cover"
                 />
@@ -775,6 +780,8 @@ export const ClinicalInsightsSection: React.FC<{
                   <img
                     src={article.image}
                     alt={article.imageAlt}
+                    loading="lazy"
+                    decoding="async"
                     referrerPolicy="no-referrer"
                     className="w-full h-full object-cover transition-transform duration-500 ease-out hover:scale-[1.03]"
                   />

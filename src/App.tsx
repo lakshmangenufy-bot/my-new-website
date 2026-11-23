@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Activity,
   CalendarCheck,
@@ -43,8 +43,17 @@ import {
   ThemeMode,
 } from './data/rehabContent';
 import { playSoftTone, speakBilingual } from './utils/audioSpeech';
-import { BrainExplorerSection, BrainModeTab } from './components/BrainExplorerSection';
-import { ChatbotSection } from './components/ChatbotSection';
+import type { BrainModeTab } from './components/BrainExplorerSection';
+const BrainExplorerSection = lazy(() =>
+  import('./components/BrainExplorerSection').then((m) => ({
+    default: m.BrainExplorerSection,
+  }))
+);
+const ChatbotSection = lazy(() =>
+  import('./components/ChatbotSection').then((m) => ({
+    default: m.ChatbotSection,
+  }))
+);
 import { ExercisesSection } from './components/ExercisesSection';
 import { MedicationSection } from './components/MedicationSection';
 import { HydrationSection, SpeechSection } from './components/HydrationSpeechSection';
@@ -117,24 +126,61 @@ function loadInitialState(): AppState {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return DEFAULT_STATE;
     const parsed = JSON.parse(raw);
-    const parsedRem = parsed.medReminders || {};
+    if (!parsed || typeof parsed !== 'object') return DEFAULT_STATE;
+
+    const parsedRem = parsed.medReminders && typeof parsed.medReminders === 'object' ? parsed.medReminders : {};
+    const language: Language = parsed.language === 'en' ? 'en' : 'ta';
+    const theme: ThemeMode = parsed.theme === 'dark' ? 'dark' : 'light';
+    const textSize: TextSizeMode =
+      parsed.textSize === 'large' || parsed.textSize === 'xl' ? parsed.textSize : 'normal';
+    const recoveryFocus: AppState['recoveryFocus'] =
+      parsed.recoveryFocus === 'speech' ||
+      parsed.recoveryFocus === 'medications' ||
+      parsed.recoveryFocus === 'brain'
+        ? parsed.recoveryFocus
+        : 'mobility';
+    const rawWater = Number(parsed.waterCount);
+    const waterCount = Number.isFinite(rawWater) ? Math.max(0, Math.min(8, Math.round(rawWater))) : 0;
+    const profileName = typeof parsed.profileName === 'string' ? parsed.profileName.slice(0, 40) : '';
+
     return {
       ...DEFAULT_STATE,
-      ...parsed,
-      exercises: { ...DEFAULT_STATE.exercises, ...(parsed.exercises || {}) },
-      medications: { ...DEFAULT_STATE.medications, ...(parsed.medications || {}) },
-      practicedSpeechIds: Array.isArray(parsed.practicedSpeechIds) ? parsed.practicedSpeechIds : [],
-      exerciseHistory: Array.isArray(parsed.exerciseHistory) ? parsed.exerciseHistory : [],
-      medicationHistory: Array.isArray(parsed.medicationHistory) ? parsed.medicationHistory : [],
-      waterHistory: Array.isArray(parsed.waterHistory) ? parsed.waterHistory : [],
-      activeDates: Array.isArray(parsed.activeDates) ? parsed.activeDates : [],
+      language,
+      theme,
+      textSize,
+      highContrast: Boolean(parsed.highContrast),
+      profileName,
+      recoveryFocus,
+      waterCount,
+      exercises: {
+        ex1: Boolean(parsed.exercises?.ex1),
+        ex2: Boolean(parsed.exercises?.ex2),
+        ex3: Boolean(parsed.exercises?.ex3),
+      },
+      medications: {
+        med1: Boolean(parsed.medications?.med1),
+        med2: Boolean(parsed.medications?.med2),
+        med3: Boolean(parsed.medications?.med3),
+        med4: Boolean(parsed.medications?.med4),
+      },
+      practicedSpeechIds: Array.isArray(parsed.practicedSpeechIds)
+        ? parsed.practicedSpeechIds.filter((id: unknown): id is string => typeof id === 'string')
+        : [],
+      exerciseHistory: Array.isArray(parsed.exerciseHistory) ? parsed.exerciseHistory.slice(0, 50) : [],
+      medicationHistory: Array.isArray(parsed.medicationHistory) ? parsed.medicationHistory.slice(0, 50) : [],
+      waterHistory: Array.isArray(parsed.waterHistory) ? parsed.waterHistory.slice(0, 50) : [],
+      activeDates: Array.isArray(parsed.activeDates)
+        ? parsed.activeDates.filter((d: unknown): d is string => typeof d === 'string').slice(-35)
+        : [],
       dailyProgressByDate:
         parsed.dailyProgressByDate && typeof parsed.dailyProgressByDate === 'object'
           ? parsed.dailyProgressByDate
           : {},
       medReminders: {
         ...DEFAULT_MED_REMINDER_SETTINGS,
-        ...parsedRem,
+        enabled: parsedRem.enabled !== undefined ? Boolean(parsedRem.enabled) : true,
+        soundEnabled: parsedRem.soundEnabled !== undefined ? Boolean(parsedRem.soundEnabled) : true,
+        voiceEnabled: parsedRem.voiceEnabled !== undefined ? Boolean(parsedRem.voiceEnabled) : true,
         schedules: {
           ...DEFAULT_MED_REMINDER_SETTINGS.schedules,
           ...(parsedRem.schedules || {}),
@@ -209,6 +255,47 @@ export default function App() {
     if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
     toastTimerRef.current = window.setTimeout(() => setToast(null), 3200);
   };
+
+  useEffect(() => {
+    return () => {
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    };
+  }, []);
+
+  // Close open dialogs or mobile menu on Escape key for keyboard accessibility
+  useEffect(() => {
+    const hasOpenOverlay =
+      mobileMenuOpen ||
+      sosOpen ||
+      personalizeOpen ||
+      resourceModalId !== null ||
+      legalModalType !== null ||
+      celebrationOpen ||
+      alertModalPeriod !== null;
+    if (!hasOpenOverlay) return;
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      if (sosOpen) setSosOpen(false);
+      else if (alertModalPeriod !== null) setAlertModalPeriod(null);
+      else if (personalizeOpen) setPersonalizeOpen(false);
+      else if (resourceModalId !== null) setResourceModalId(null);
+      else if (legalModalType !== null) setLegalModalType(null);
+      else if (celebrationOpen) setCelebrationOpen(false);
+      else if (mobileMenuOpen) setMobileMenuOpen(false);
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [
+    mobileMenuOpen,
+    sosOpen,
+    personalizeOpen,
+    resourceModalId,
+    legalModalType,
+    celebrationOpen,
+    alertModalPeriod,
+  ]);
 
   useEffect(() => {
     try {
@@ -1183,12 +1270,27 @@ export default function App() {
         </section>
 
         {/* 04. DEEP DARK 3D BRAIN SHOWCASE (#0B1220) */}
-        <BrainExplorerSection
-          lang={state.language}
-          activeTab={brainTab}
-          onChangeTab={setBrainTab}
-          onNotify={notify}
-        />
+        <Suspense
+          fallback={
+            <section
+              id="brain-explorer"
+              className="w-full bg-[#0B1220] text-white apple-section-pad"
+            >
+              <div className="max-w-[1100px] mx-auto px-4 sm:px-6 text-center py-24">
+                <p className="text-[1.125rem] text-slate-300">
+                  {isTa ? '3D மூளை பகுதி தயாராகிறது...' : 'Preparing 3D Brain Explorer...'}
+                </p>
+              </div>
+            </section>
+          }
+        >
+          <BrainExplorerSection
+            lang={state.language}
+            activeTab={brainTab}
+            onChangeTab={setBrainTab}
+            onNotify={notify}
+          />
+        </Suspense>
 
         {/* 05. CHAPTER: GUIDED PHYSIOTHERAPY (#F2F7F6) */}
         <section
@@ -1399,10 +1501,25 @@ export default function App() {
         </section>
 
         {/* 09. 3D AI CARE COMPANION CHATBOT (#0B1220) */}
-        <ChatbotSection
-          lang={state.language}
-          patientContextSummary={`Progress ${progressPct}% (${finishedMilestones}/${totalMilestones} daily goals: exercises ${exDone}/3, medicines ${medDone}/4, water ${state.waterCount}/8 glasses, speech ${state.practicedSpeechIds.length}/${SPEECH_WORDS.length})`}
-        />
+        <Suspense
+          fallback={
+            <section
+              id="ai-companion"
+              className="w-full bg-[#0B1220] text-white apple-section-pad"
+            >
+              <div className="max-w-[1100px] mx-auto px-4 sm:px-6 text-center py-24">
+                <p className="text-[1.125rem] text-slate-300">
+                  {isTa ? '3D AI உதவியாளர் தயாராகிறது...' : 'Preparing 3D Care Assistant...'}
+                </p>
+              </div>
+            </section>
+          }
+        >
+          <ChatbotSection
+            lang={state.language}
+            patientContextSummary={`Progress ${progressPct}% (${finishedMilestones}/${totalMilestones} daily goals: exercises ${exDone}/3, medicines ${medDone}/4, water ${state.waterCount}/8 glasses, speech ${state.practicedSpeechIds.length}/${SPEECH_WORDS.length})`}
+          />
+        </Suspense>
 
         {/* 10. CLINICAL INSIGHTS & GUIDES (#F2F7F6) */}
         <ClinicalInsightsSection

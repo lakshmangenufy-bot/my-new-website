@@ -183,6 +183,7 @@ export const ExercisesSection: React.FC<ExercisesSectionProps> = ({
             <div className="aspect-video w-full">
               <iframe
                 key={currentExercise.youtubeId}
+                loading="lazy"
                 className="w-full h-full"
                 src={`https://www.youtube.com/embed/${currentExercise.youtubeId}?rel=0&playsinline=1`}
                 title={currentExercise.youtubeTitle}
@@ -252,6 +253,7 @@ export const ExercisesSection: React.FC<ExercisesSectionProps> = ({
               <button
                 type="button"
                 onClick={() => setVoiceCountdown((v) => !v)}
+                aria-pressed={voiceCountdown}
                 aria-label={isTa ? 'குரல் எண்ணிக்கை மாற்று' : 'Toggle voice countdown'}
                 className="min-h-[48px] px-3.5 py-2 rounded-full bg-white dark:bg-[#0B1220] text-[1rem] font-semibold text-[#0F1F2E] dark:text-slate-100 flex items-center gap-1.5 cursor-pointer"
               >

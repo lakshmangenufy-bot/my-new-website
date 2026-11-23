@@ -180,6 +180,7 @@ export const MedicationSection: React.FC<MedicationSectionProps> = ({
             <button
               type="button"
               onClick={onToggleRemindersEnabled}
+              aria-pressed={medReminders.enabled}
               className="apple-pill-btn min-h-[56px] px-4 py-3 bg-white dark:bg-[#111A2B] text-[1.125rem] font-semibold text-[#0F1F2E] dark:text-white flex items-center justify-center gap-2 cursor-pointer"
             >
               {medReminders.enabled ? (
@@ -201,6 +202,7 @@ export const MedicationSection: React.FC<MedicationSectionProps> = ({
             <button
               type="button"
               onClick={onToggleReminderSound}
+              aria-pressed={medReminders.soundEnabled}
               className="apple-pill-btn min-h-[56px] px-4 py-3 bg-white dark:bg-[#111A2B] text-[1.125rem] font-semibold text-[#0F1F2E] dark:text-white flex items-center justify-center gap-2 cursor-pointer"
             >
               {medReminders.soundEnabled ? (
@@ -417,6 +419,7 @@ export const MedicationSection: React.FC<MedicationSectionProps> = ({
           <button
             key={tab.id}
             type="button"
+            aria-pressed={filterPeriod === tab.id}
             onClick={() => setFilterPeriod(tab.id)}
             className={`apple-pill-btn min-h-[56px] px-5 py-2 text-[1.125rem] font-semibold cursor-pointer ${
               filterPeriod === tab.id
