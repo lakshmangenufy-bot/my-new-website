@@ -936,8 +936,8 @@ export const ChatbotSection: React.FC<ChatbotSectionProps> = ({
                     </span>
                   </button>
 
-                  <span className="text-[0.875rem] text-[#3A4753] dark:text-[#D3DFE9]">
-                    {isTa ? 'மருத்துவர் ஆலோசனையைப் பின்பற்றவும்.' : 'Follow your doctor’s advice.'}
+                  <span className="text-[1rem] text-[#3A4753] dark:text-[#D3DFE9]">
+                    {isTa ? 'கல்வி வழிகாட்டுதல் மட்டுமே · மருத்துவர் ஆலோசனையைப் பின்பற்றவும்.' : 'Educational support only · Follow your doctor’s advice.'}
                   </span>
                 </div>
               </div>
@@ -1029,7 +1029,7 @@ export const ChatbotSection: React.FC<ChatbotSectionProps> = ({
               >
                 {/* Initial Role Greeting */}
                 <div className="rounded-2xl bg-white dark:bg-[#111A2B] p-4 sm:p-5 space-y-2 shadow-sm">
-                  <div className="flex items-center justify-between gap-2 text-[0.875rem] font-semibold text-[#1F6F63] dark:text-[#2DD4BF]">
+                  <div className="flex items-center justify-between gap-2 text-[1rem] font-semibold text-[#1F6F63] dark:text-[#2DD4BF]">
                     <span>{roleLabel}</span>
                     <button
                       type="button"
@@ -1083,7 +1083,7 @@ export const ChatbotSection: React.FC<ChatbotSectionProps> = ({
                         }`}
                       >
                         <div
-                          className={`flex flex-wrap items-center justify-between gap-3 text-[0.875rem] ${
+                          className={`flex flex-wrap items-center justify-between gap-3 text-[1rem] ${
                             isUser
                               ? 'text-teal-100'
                               : 'text-[#3A4753] dark:text-[#D3DFE9]'
@@ -1097,7 +1097,7 @@ export const ChatbotSection: React.FC<ChatbotSectionProps> = ({
                               type="button"
                               onClick={() => handleSpeakMessage(msg)}
                               aria-pressed={isThisPlaying}
-                              className={`min-h-[44px] px-3.5 py-1.5 rounded-full text-[0.875rem] font-semibold inline-flex items-center gap-1.5 cursor-pointer ${
+                              className={`min-h-[44px] px-3.5 py-1.5 rounded-full text-[1rem] font-semibold inline-flex items-center gap-1.5 cursor-pointer ${
                                 isThisPlaying
                                   ? 'bg-[#1F6F63] text-white'
                                   : 'bg-[#E3F1ED] dark:bg-[#112A27] text-[#1F6F63] dark:text-[#2DD4BF]'
@@ -1132,8 +1132,8 @@ export const ChatbotSection: React.FC<ChatbotSectionProps> = ({
                         {/* Google Search Grounding Sources */}
                         {!isUser && msg.sources && msg.sources.length > 0 && (
                           <div className="pt-2 border-t border-black/10 dark:border-white/10 space-y-1.5">
-                            <p className="text-[0.8125rem] font-semibold uppercase tracking-wide text-[#0F4C81] dark:text-sky-300 inline-flex items-center gap-1.5">
-                              <Globe className="w-3.5 h-3.5" aria-hidden="true" />
+                            <p className="text-[0.9375rem] font-semibold uppercase tracking-wide text-[#0F4C81] dark:text-sky-300 inline-flex items-center gap-1.5">
+                              <Globe className="w-4 h-4" aria-hidden="true" />
                               <span>{isTa ? 'சரிபார்க்கப்பட்ட இணைய ஆதாரங்கள்' : 'Verified Web Sources'}</span>
                             </p>
                             <div className="flex flex-wrap gap-2">
@@ -1143,7 +1143,7 @@ export const ChatbotSection: React.FC<ChatbotSectionProps> = ({
                                   href={src.uri}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="min-h-[44px] px-3 py-1.5 rounded-xl bg-[#EEF5FB] dark:bg-[#0D2136] text-[#0F4C81] dark:text-sky-200 hover:underline text-[0.875rem] font-medium inline-flex items-center gap-1.5 max-w-full"
+                                  className="min-h-[44px] px-3 py-1.5 rounded-xl bg-[#EEF5FB] dark:bg-[#0D2136] text-[#0F4C81] dark:text-sky-200 hover:underline text-[1rem] font-medium inline-flex items-center gap-1.5 max-w-full"
                                 >
                                   <span className="truncate max-w-[220px]">{src.title}</span>
                                   <ExternalLink className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />

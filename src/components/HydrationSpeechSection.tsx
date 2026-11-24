@@ -128,13 +128,13 @@ export const HydrationSection: React.FC<{
               className="apple-pill-btn min-h-[56px] px-5 py-3 bg-[#F2F7F6] dark:bg-[#0B1220] disabled:opacity-45 text-[1.125rem] font-semibold text-[#0F1F2E] dark:text-white flex items-center justify-center gap-2 cursor-pointer"
             >
               <Undo2 className="w-5 h-5" />
-              <span>{isTa ? 'வாபஸ் பெறும் (Undo -1)' : 'Undo Last Glass'}</span>
+              <span>{isTa ? 'கடைசி டம்ளரை நீக்கு (Undo -1)' : 'Undo Last Glass'}</span>
             </button>
           </div>
         </div>
 
         <div className="rounded-[24px] bg-[#F2F7F6] dark:bg-[#0B1220] p-5 space-y-2">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2">
             <h4 className="text-[1rem] font-semibold text-[#3A4753] dark:text-[#D3DFE9]">
               {isTa ? 'இன்றைய தண்ணீர் பதிவு' : 'Today Hydration Log'}
             </h4>
@@ -142,9 +142,10 @@ export const HydrationSection: React.FC<{
               <button
                 type="button"
                 onClick={onClearWaterHistory}
-                className="text-[1rem] font-semibold text-[#1F6F63] dark:text-[#2DD4BF] hover:underline flex items-center gap-1 cursor-pointer"
+                aria-label={isTa ? 'தண்ணீர் பதிவை அழி' : 'Clear hydration log'}
+                className="min-h-[44px] px-3 py-1.5 rounded-full text-[1rem] font-semibold text-[#1F6F63] dark:text-[#2DD4BF] hover:bg-[#E3F1ED] dark:hover:bg-[#112A27] flex items-center gap-1.5 cursor-pointer"
               >
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="w-4 h-4" aria-hidden="true" />
                 <span>{isTa ? 'அழி' : 'Clear'}</span>
               </button>
             )}
@@ -218,7 +219,7 @@ export const HydrationSection: React.FC<{
 
           <div className="p-5 rounded-2xl bg-amber-50 dark:bg-amber-950/35 space-y-1">
             <h4 className="text-[1.125rem] font-semibold text-amber-950 dark:text-amber-200">
-              🥗 {isTa ? 'எண்ணெய் வறுவல்களைத் தவிர்க்கவும்' : 'Limit Deep-Fried Foods'}
+              🍲 {isTa ? 'எண்ணெய் வறுவல்களைத் தவிர்க்கவும்' : 'Limit Deep-Fried Foods'}
             </h4>
             <p className="text-[1.125rem] text-amber-950 dark:text-amber-100 leading-[1.55]">
               {isTa
@@ -247,6 +248,7 @@ export const SpeechSection: React.FC<{
   const [voiceMode, setVoiceMode] = useState<AudioVoiceMode>(() => getAudioVoiceMode());
   const [quizIndex, setQuizIndex] = useState<number>(0);
   const [quizScore, setQuizScore] = useState<number>(0);
+  const [answeredQuestions, setAnsweredQuestions] = useState<Record<number, boolean>>({});
   const [quizFeedback, setQuizFeedback] = useState<{
     correct: boolean;
     msg: string;
@@ -273,20 +275,23 @@ export const SpeechSection: React.FC<{
     if (!opt) return;
     if (opt.isCorrect) {
       playSoftTone(880, 0.22);
-      setQuizScore((s) => Math.min(MATCH_QUESTIONS.length, s + 1));
+      if (!answeredQuestions[quizIndex]) {
+        setAnsweredQuestions((prev) => ({ ...prev, [quizIndex]: true }));
+        setQuizScore((s) => Math.min(MATCH_QUESTIONS.length, s + 1));
+      }
       setQuizFeedback({
         correct: true,
         msg: isTa
-          ? `அருமை! “${opt.label_ta}” என்பது சரியான பதில்.`
-          : `Well done! “${opt.label_en}” is the right match.`,
+          ? `அருமை! “${opt.label_ta}” (${opt.label_en}) என்பது சரியான பதில்.`
+          : `Well done! “${opt.label_en}” (${opt.label_ta}) is the right match.`,
       });
     } else {
       playSoftTone(330, 0.2);
       setQuizFeedback({
         correct: false,
         msg: isTa
-          ? `மீண்டும் முயற்சிக்கவும்! சரியான சொல் “${currentQuestion.target_ta}”.`
-          : `Try again — look for “${currentQuestion.target_en}”.`,
+          ? 'மீண்டும் முயற்சிக்கவும் — மேலே உள்ள படத்தைப் பார்த்து அல்லது குரல் உதவியைக் கேட்டுச் சரியான சொல்லைத் தேர்ந்தெடுக்கவும்.'
+          : 'Not quite — look at the picture above or play the audio hint and try another match.',
       });
     }
   };
@@ -530,14 +535,25 @@ export const SpeechSection: React.FC<{
             </span>
           </div>
 
-          <div className="text-center py-5 space-y-2 bg-white dark:bg-[#111A2B] rounded-[24px]">
-            <div className="text-6xl" aria-hidden="true">
+          <div className="text-center py-6 px-4 space-y-4 bg-white dark:bg-[#111A2B] rounded-[24px]">
+            <div className="text-7xl select-none" aria-hidden="true">
               {currentQuestion.emoji}
             </div>
-            <div className="text-2xl sm:text-3xl font-semibold text-[#0F1F2E] dark:text-white">
-              {currentQuestion.target_ta}{' '}
-              <span className="text-[#1F6F63] dark:text-[#2DD4BF]">· {currentQuestion.target_en}</span>
-            </div>
+            <p className="text-[1.0625rem] text-[#3A4753] dark:text-[#D3DFE9]">
+              {isTa
+                ? `கேள்வி ${quizIndex + 1} / ${MATCH_QUESTIONS.length} · படத்திற்குப் பொருந்தும் சொல்லைத் தேர்ந்தெடுக்கவும்`
+                : `Question ${quizIndex + 1} of ${MATCH_QUESTIONS.length} · Match the picture below`}
+            </p>
+            <button
+              type="button"
+              onClick={() =>
+                handlePlayWord(currentQuestion.target_ta, currentQuestion.target_en, `quiz-clue-${quizIndex}`)
+              }
+              className="apple-pill-btn min-h-[48px] px-5 py-2 bg-[#E3F1ED] dark:bg-[#112A27] text-[#1F6F63] dark:text-[#2DD4BF] text-[1rem] font-semibold inline-flex items-center gap-2 cursor-pointer"
+            >
+              <Volume2 className="w-5 h-5 shrink-0" aria-hidden="true" />
+              <span>{isTa ? 'குரல் உதவியைக் கேட்க' : 'Hear Audio Clue'}</span>
+            </button>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -582,6 +598,7 @@ export const SpeechSection: React.FC<{
               onClick={() => {
                 setQuizIndex(0);
                 setQuizScore(0);
+                setAnsweredQuestions({});
                 setQuizFeedback(null);
               }}
               className="apple-pill-btn min-h-[56px] px-6 py-2.5 bg-white dark:bg-[#111A2B] text-[1.125rem] font-semibold text-[#0F1F2E] dark:text-white flex items-center gap-2 cursor-pointer"

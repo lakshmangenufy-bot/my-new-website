@@ -52,25 +52,25 @@ interface BrainExplorerSectionProps {
 }
 
 const REGION_CHIPS: Array<{ id: string; ta: string; en: string }> = [
-  { id: 'Brain-cerebral_hemisphere-left', ta: 'இடது அரைக்கோளம்', en: 'Left Hemisphere' },
-  { id: 'Brain-cerebral_hemisphere-right', ta: 'வலது அரைக்கோளம்', en: 'Right Hemisphere' },
-  { id: 'Brain-frontal_lobe-left', ta: 'முன்பக்க மடல் (Frontal)', en: 'Frontal Lobe' },
-  { id: 'Brain-parietal_lobe-left', ta: 'உச்சி மடல் (Parietal)', en: 'Parietal Lobe' },
-  { id: 'Brain-temporal_lobe-left', ta: 'பொட்டு மடல் (Temporal)', en: 'Temporal Lobe' },
-  { id: 'Brain-occipital_lobe-left', ta: 'பின்மண்டை மடல் (Occipital)', en: 'Occipital Lobe' },
-  { id: 'Brain-cerebellum', ta: 'சிறுமூளை', en: 'Cerebellum' },
-  { id: 'Brain-brainstem', ta: 'மூளைத்தண்டு', en: 'Brainstem' },
-  { id: 'Brain-corpus_callosum', ta: 'கார்பஸ் கலோசம்', en: 'Corpus Callosum' },
-  { id: 'Brain-vasculature-mca', ta: 'பக்கவாத ரத்தக்குழாய் (MCA)', en: 'MCA Vessel Overlay' },
+  { id: 'Brain-cerebral_hemisphere-left', ta: 'இடது மூளை (வலது உடல்)', en: 'Left Brain (Right Body)' },
+  { id: 'Brain-cerebral_hemisphere-right', ta: 'வலது மூளை (இடது உடல்)', en: 'Right Brain (Left Body)' },
+  { id: 'Brain-frontal_lobe-left', ta: 'முன் பகுதி (இயக்கம் & பேச்சு)', en: 'Front (Movement & Speech)' },
+  { id: 'Brain-parietal_lobe-left', ta: 'உச்சி பகுதி (தொடு உணர்வு)', en: 'Top-Back (Touch & Awareness)' },
+  { id: 'Brain-temporal_lobe-left', ta: 'பக்கவாட்டுப் பகுதி (கேட்டல் & நினைவு)', en: 'Side (Hearing & Memory)' },
+  { id: 'Brain-occipital_lobe-left', ta: 'பின் பகுதி (பார்வை)', en: 'Back (Vision Center)' },
+  { id: 'Brain-cerebellum', ta: 'சிறுமூளை (சமநிலை & ஒருங்கிணைப்பு)', en: 'Balance Center (Cerebellum)' },
+  { id: 'Brain-brainstem', ta: 'மூளைத்தண்டு (சுவாசம் & விழுங்குதல்)', en: 'Vital Relay (Brainstem)' },
+  { id: 'Brain-corpus_callosum', ta: 'மூளைப் பாலம் (இருபக்க இணைப்பு)', en: 'Brain Bridge (Left–Right Link)' },
+  { id: 'Brain-vasculature-mca', ta: 'பக்கவாத ரத்தக்குழாய் (MCA)', en: 'Stroke Artery (MCA)' },
 ];
 
 const PRESET_VIEWS: Array<{ id: PresetViewName; ta: string; en: string }> = [
-  { id: 'left_lateral', ta: 'இடது', en: 'Left' },
-  { id: 'right_lateral', ta: 'வலது', en: 'Right' },
-  { id: 'anterior', ta: 'முன்', en: 'Front' },
-  { id: 'superior', ta: 'மேல்', en: 'Top' },
-  { id: 'posterior', ta: 'பின்', en: 'Back' },
-  { id: 'full', ta: 'முழுமை', en: 'Full' },
+  { id: 'left_lateral', ta: 'இடது பக்கம்', en: 'Left Side' },
+  { id: 'right_lateral', ta: 'வலது பக்கம்', en: 'Right Side' },
+  { id: 'anterior', ta: 'முன் பக்கம்', en: 'Front' },
+  { id: 'superior', ta: 'மேல் பக்கம்', en: 'Top' },
+  { id: 'posterior', ta: 'பின் பக்கம்', en: 'Back' },
+  { id: 'full', ta: 'முழு மூளை', en: 'Whole Brain' },
 ];
 
 export const BrainExplorerSection: React.FC<BrainExplorerSectionProps> = ({
@@ -469,20 +469,20 @@ export const BrainExplorerSection: React.FC<BrainExplorerSectionProps> = ({
           <h2 className="apple-section-title text-white headline-balance tamil-safe">
             {isTa ? (
               <>
-                மூளை எவ்வாறு மீள்கிறது என்பதை{' '}
-                <span className="apple-headline-gradient">அருகிலிருந்து பாருங்கள்.</span>
+                மூளையும் உடலும் எவ்வாறு இணைந்துள்ளன என்பதை{' '}
+                <span className="apple-headline-gradient">எளிதாக அறியுங்கள்.</span>
               </>
             ) : (
               <>
-                See how the brain{' '}
-                <span className="apple-headline-gradient">heals and adapts.</span>
+                Explore how the brain &amp; body{' '}
+                <span className="apple-headline-gradient">heal and connect.</span>
               </>
             )}
           </h2>
-          <p className="text-[1.25rem] font-normal text-slate-300 leading-[1.6] min-w-0 [overflow-wrap:anywhere]">
+          <p className="text-[1.125rem] sm:text-[1.25rem] font-normal text-slate-300 leading-[1.6] min-w-0 [overflow-wrap:anywhere]">
             {isTa
-              ? 'மூளைப் பகுதிகளை சுழற்றிப் பார்த்து, பக்கவாதம் எந்தப் பகுதியை பாதிக்கிறது என்பதை தமிழ் மற்றும் ஆங்கிலத்தில் கேளுங்கள்.'
-              : 'Rotate the anatomical 3D atlas, inspect 10 cortical pathways, or step through stroke cascades.'}
+              ? 'மூளைப் பகுதிகளை சுழற்றிப் பார்க்கலாம் அல்லது கீழே உள்ள எளிய உரை மற்றும் குரல் விளக்கங்களை நேரடியாகப் படிக்கலாம்.'
+              : 'Use the simple buttons to inspect 10 brain areas, switch to the flat 2D diagram, or read and listen to plain-language explanations without using 3D.'}
           </p>
 
           {/* 3-Step Segmented Control */}
@@ -504,7 +504,7 @@ export const BrainExplorerSection: React.FC<BrainExplorerSectionProps> = ({
                 }`}
               >
                 <Layers className="w-5 h-5" aria-hidden="true" />
-                <span>{isTa ? '3D மூளை' : '3D Brain'}</span>
+                <span>{isTa ? '3D உடல் & மூளை' : '3D Brain Guide'}</span>
               </button>
 
               <button
@@ -518,7 +518,7 @@ export const BrainExplorerSection: React.FC<BrainExplorerSectionProps> = ({
                     : 'text-slate-100 hover:bg-white/10'
                 }`}
               >
-                <span>{isTa ? 'பக்கவாதப் படிகள்' : 'Stroke Steps'}</span>
+                <span>{isTa ? 'பக்கவாதம் ஏற்படும் படிகள்' : 'How Stroke Happens'}</span>
               </button>
 
               <button
@@ -532,7 +532,7 @@ export const BrainExplorerSection: React.FC<BrainExplorerSectionProps> = ({
                     : 'text-slate-100 hover:bg-white/10'
                 }`}
               >
-                <span>{isTa ? '2D வரைபடம்' : '2D Diagram'}</span>
+                <span>{isTa ? 'எளிய 2D வரைபடம்' : 'Simple 2D Diagram'}</span>
               </button>
             </div>
           </div>
@@ -546,13 +546,36 @@ export const BrainExplorerSection: React.FC<BrainExplorerSectionProps> = ({
           }}
           className="clinical-card hc-card p-5 sm:p-8 space-y-6 text-[#0F1F2E] dark:text-white"
         >
+          {/* Clear Pre-Interaction Beginner Guidance Banner */}
+          <div className="rounded-2xl bg-[#F2F7F6] dark:bg-[#0B1220] border border-[var(--border-subtle)] p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="space-y-1.5 min-w-0">
+              <p className="text-[1.125rem] font-semibold text-[#0F1F2E] dark:text-white">
+                {isTa ? 'இந்த வழிகாட்டியை எவ்வாறு பயன்படுத்துவது?' : 'How to Use This Guide (No 3D Skills Needed)'}
+              </p>
+              <p className="text-[1rem] text-[#3A4753] dark:text-[#D3DFE9] leading-relaxed">
+                {isTa
+                  ? 'வலதுபுறம் உள்ள பகுதிப் பொத்தான்களில் ஒன்றைத் தொடவும், அல்லது கீழே உள்ள சுழற்று / பெரிதாக்கு பொத்தான்களைப் பயன்படுத்தவும். 3D சுழற்றாமல் கூட அனைத்து விளக்கங்களையும் படித்துக் கேட்கலாம்.'
+                  : 'Tap any brain area button to jump right there, or use the Rotate, Zoom In, Zoom Out, and Reset View buttons below. Every explanation is fully readable and spoken even without touching the 3D view.'}
+              </p>
+            </div>
+            {activeTab !== 'diagram_2d' && (
+              <button
+                type="button"
+                onClick={() => onChangeTab('diagram_2d')}
+                className="apple-pill-btn min-h-[48px] px-5 py-2 bg-white dark:bg-[#111A2B] border border-[#1F6F63]/35 dark:border-[#2DD4BF]/40 text-[#1F6F63] dark:text-[#2DD4BF] text-[1rem] font-semibold shrink-0 cursor-pointer hover:bg-[#E3F1ED] dark:hover:bg-[#112A27]"
+              >
+                {isTa ? 'எளிய 2D படத்திற்கு மாறு' : 'Switch to Simple 2D View'}
+              </button>
+            )}
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             {/* LEFT: Clean 3D Atlas Viewport + External Toolbar BELOW */}
             <div className="lg:col-span-7 space-y-4">
               <div className="flex items-center justify-between gap-3 px-4 py-3 rounded-2xl bg-[#E3F1ED] dark:bg-[#112A27] text-[1rem] font-medium text-[#0F1F2E] dark:text-slate-100">
                 <span className="flex items-center gap-2 truncate">
                   <Compass className="w-5 h-5 text-[#1F6F63] dark:text-[#2DD4BF] shrink-0" aria-hidden="true" />
-                  <span className="truncate">
+                  <span className="truncate font-semibold">
                     {kbdCandidateRegion
                       ? isTa
                         ? `Enter அழுத்தி தேர்வு செய்க: ${kbdCandidateRegion.name_ta}`
@@ -560,18 +583,18 @@ export const BrainExplorerSection: React.FC<BrainExplorerSectionProps> = ({
                       : hoveredInfo
                       ? `${hoveredInfo.name_en} · ${hoveredInfo.name_ta}`
                       : isTa
-                      ? `தேர்வு: ${currentStruct.name_ta}`
-                      : `Selected: ${currentStruct.name_en}`}
+                      ? `தற்போதைய தேர்வு: ${currentStruct.name_ta}`
+                      : `Viewing: ${currentStruct.name_en}`}
                   </span>
                 </span>
-                <span className="text-[0.875rem] text-[#3A4753] dark:text-[#D3DFE9] shrink-0 hidden sm:inline">
+                <span className="text-[1rem] text-[#3A4753] dark:text-[#D3DFE9] shrink-0 hidden sm:inline">
                   {activeTab === 'diagram_2d'
                     ? isTa
                       ? '2D மருத்துவப் படம்'
-                      : '2D Clinical View'
+                      : '2D View'
                     : isTa
-                    ? 'சுழற்ற இழுக்கவும் · தட்டவும்'
-                    : 'Drag to rotate · Tap region'}
+                    ? 'இழுக்கலாம் அல்லது பொத்தான் அழுத்தலாம்'
+                    : 'Drag or use buttons below'}
                 </span>
               </div>
 
@@ -800,10 +823,10 @@ export const BrainExplorerSection: React.FC<BrainExplorerSectionProps> = ({
 
               {/* Clean External Toolbar BELOW the Viewport */}
               {activeTab !== 'diagram_2d' && !webglError && (
-                <div className="rounded-[24px] bg-[#F2F7F6] dark:bg-[#0B1220] p-4 sm:p-5 space-y-3.5">
+                <div className="rounded-[24px] bg-[#F2F7F6] dark:bg-[#0B1220] p-4 sm:p-5 space-y-4">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-[1.125rem] font-semibold text-[#3A4753] dark:text-[#D3DFE9] mr-1">
-                      {isTa ? 'பார்வை:' : 'View:'}
+                    <span className="text-[1rem] font-semibold text-[#3A4753] dark:text-[#D3DFE9] mr-1">
+                      {isTa ? 'பார்வை:' : 'Camera Angle:'}
                     </span>
                     {PRESET_VIEWS.map((v) => (
                       <button
@@ -821,23 +844,44 @@ export const BrainExplorerSection: React.FC<BrainExplorerSectionProps> = ({
                     ))}
                   </div>
 
+                  {/* Beginner-Friendly Explicit Rotate Left / Right + Zoom In / Out Controls */}
                   <div className="flex flex-wrap items-center gap-2.5 pt-3 border-t border-[var(--border-subtle)]">
                     <button
                       type="button"
-                      onClick={() => controllerRef.current?.zoomOut()}
-                      aria-label={isTa ? 'சிறிதாக்கு' : 'Zoom out'}
-                      className="min-h-[48px] min-w-[48px] px-3.5 rounded-full bg-white dark:bg-[#111A2B] text-[#0F1F2E] dark:text-white text-[1rem] font-semibold flex items-center justify-center cursor-pointer"
+                      onClick={() => controllerRef.current?.rotateBy(-0.28, 0)}
+                      className="apple-pill-btn min-h-[48px] px-4 py-2 bg-white dark:bg-[#111A2B] text-[#0F1F2E] dark:text-white text-[1rem] font-semibold inline-flex items-center gap-1.5 cursor-pointer"
                     >
-                      <ZoomOut className="w-5 h-5" aria-hidden="true" />
+                      <ChevronLeft className="w-5 h-5 shrink-0" aria-hidden="true" />
+                      <span>{isTa ? 'இடது சுழற்று' : 'Rotate Left'}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => controllerRef.current?.rotateBy(0.28, 0)}
+                      className="apple-pill-btn min-h-[48px] px-4 py-2 bg-white dark:bg-[#111A2B] text-[#0F1F2E] dark:text-white text-[1rem] font-semibold inline-flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <span>{isTa ? 'வலது சுழற்று' : 'Rotate Right'}</span>
+                      <ChevronRight className="w-5 h-5 shrink-0" aria-hidden="true" />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => controllerRef.current?.zoomOut()}
+                      aria-label={isTa ? 'சிறிதாக்கு (Zoom Out)' : 'Zoom out'}
+                      className="apple-pill-btn min-h-[48px] px-4 py-2 bg-white dark:bg-[#111A2B] text-[#0F1F2E] dark:text-white text-[1rem] font-semibold inline-flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <ZoomOut className="w-5 h-5 shrink-0" aria-hidden="true" />
+                      <span>{isTa ? 'சிறிதாக்கு' : 'Zoom Out'}</span>
                     </button>
 
                     <button
                       type="button"
                       onClick={() => controllerRef.current?.zoomIn()}
-                      aria-label={isTa ? 'பெரிதாக்கு' : 'Zoom in'}
-                      className="min-h-[48px] min-w-[48px] px-3.5 rounded-full bg-white dark:bg-[#111A2B] text-[#0F1F2E] dark:text-white text-[1rem] font-semibold flex items-center justify-center cursor-pointer"
+                      aria-label={isTa ? 'பெரிதாக்கு (Zoom In)' : 'Zoom in'}
+                      className="apple-pill-btn min-h-[48px] px-4 py-2 bg-white dark:bg-[#111A2B] text-[#0F1F2E] dark:text-white text-[1rem] font-semibold inline-flex items-center gap-1.5 cursor-pointer"
                     >
-                      <ZoomIn className="w-5 h-5" aria-hidden="true" />
+                      <ZoomIn className="w-5 h-5 shrink-0" aria-hidden="true" />
+                      <span>{isTa ? 'பெரிதாக்கு' : 'Zoom In'}</span>
                     </button>
 
                     <button
@@ -852,8 +896,8 @@ export const BrainExplorerSection: React.FC<BrainExplorerSectionProps> = ({
                     >
                       {isTa
                         ? isAutoRotate
-                          ? 'சுழற்சி: ஆன்'
-                          : 'சுழற்சி: ஆஃப்'
+                          ? 'தானியங்கி சுழற்சி: ஆன்'
+                          : 'தானியங்கி சுழற்சி: ஆஃப்'
                         : isAutoRotate
                         ? 'Auto-Rotate: On'
                         : 'Auto-Rotate: Off'}
@@ -871,22 +915,22 @@ export const BrainExplorerSection: React.FC<BrainExplorerSectionProps> = ({
                     >
                       {isTa
                         ? isXrayOn
-                          ? 'X-Ray: ஆன்'
-                          : 'X-Ray: ஆஃப்'
+                          ? 'உள்ளே பார் (X-Ray): ஆன்'
+                          : 'உள்ளே பார் (X-Ray): ஆஃப்'
                         : isXrayOn
-                        ? 'X-Ray: On'
-                        : 'X-Ray: Off'}
+                        ? 'See Inside: On'
+                        : 'See Inside: Off'}
                     </button>
 
                     <label className="min-h-[48px] flex items-center gap-3 px-4 py-2 rounded-full bg-white dark:bg-[#111A2B] text-[1rem] font-medium text-[#0F1F2E] dark:text-white">
-                      <span>{isTa ? 'பிரிப்பு:' : 'Split hemispheres:'}</span>
+                      <span>{isTa ? 'மூளைப் பிரிப்பு:' : 'Split halves:'}</span>
                       <input
                         type="range"
                         min="0"
                         max="1"
                         step="0.05"
                         value={splitAmount}
-                        aria-label={isTa ? 'இரு மூளை அரைக்கோளங்களைப் பிரி' : 'Split hemispheres slider'}
+                        aria-label={isTa ? 'இரு மூளைப் பகுதிகளையும் பிரி' : 'Split left and right brain halves'}
                         onChange={(e) => handleSplitChange(parseFloat(e.target.value))}
                         className="w-24 h-2.5 accent-[#1F6F63] cursor-pointer"
                       />
@@ -897,26 +941,26 @@ export const BrainExplorerSection: React.FC<BrainExplorerSectionProps> = ({
                       onClick={handleResetView}
                       className="apple-pill-btn min-h-[48px] px-5 py-2 bg-[#1F6F63] hover:bg-[#17574D] text-white text-[1rem] font-semibold flex items-center gap-2 cursor-pointer ml-auto hc-primary-btn"
                     >
-                      <RotateCcw className="w-5 h-5" aria-hidden="true" />
-                      <span>{isTa ? 'மீட்டமை' : 'Reset'}</span>
+                      <RotateCcw className="w-5 h-5 shrink-0" aria-hidden="true" />
+                      <span>{isTa ? 'தொடக்க நிலைக்கு மீட்டமை' : 'Reset View'}</span>
                     </button>
                   </div>
                 </div>
               )}
 
               {/* Model Credits & Keyboard Hint Line Directly Under Viewer */}
-              <div className="px-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[0.875rem] text-[#3A4753] dark:text-[#D3DFE9]">
+              <div className="px-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[1rem] text-[#3A4753] dark:text-[#D3DFE9]">
                 <p>
                   <strong className="font-semibold text-[#0F1F2E] dark:text-white">
-                    {isTa ? 'மாதிரி உரிமம் (Model credits): ' : 'Model credits: '}
+                    {isTa ? 'மாதிரி தகவல்: ' : '3D Model: '}
                   </strong>
                   <span>
                     {isTa ? modelCredit.title_ta : modelCredit.title_en} ·{' '}
                     {isTa ? modelCredit.license_ta : modelCredit.license_en}
                   </span>
                 </p>
-                <span className="text-[0.875rem] text-[#3A4753] dark:text-[#D3DFE9]">
-                  {isTa ? 'விசைப்பலகை: ←↑↓→ சுழற்று · +/- பெரிதாக்கு' : 'Keys: Arrows rotate · +/- zoom'}
+                <span className="text-[1rem] text-[#3A4753] dark:text-[#D3DFE9]">
+                  {isTa ? 'விசைப்பலகை: ←↑↓→ சுழற்று · +/- பெரிதாக்கு' : 'Keyboard: Arrows rotate · +/- zoom'}
                 </span>
               </div>
             </div>
@@ -924,8 +968,8 @@ export const BrainExplorerSection: React.FC<BrainExplorerSectionProps> = ({
             {/* RIGHT: Wrapped Chip Selector Grid (10 Regions) + Info Panel */}
             <div className="lg:col-span-5 space-y-6">
               <div className="space-y-2.5">
-                <span className="text-[1rem] font-semibold text-[#3A4753] dark:text-[#D3DFE9] block">
-                  {isTa ? 'மூளைப் பகுதியைத் தேர்ந்தெடுக்கவும்:' : 'Select Brain Region:'}
+                <span className="text-[1.0625rem] font-semibold text-[#3A4753] dark:text-[#D3DFE9] block">
+                  {isTa ? 'பகுதியைத் தேர்ந்தெடுக்கவும் (எது வேண்டுமானாலும் தட்டவும்):' : 'Select Brain & Body Region:'}
                 </span>
                 <div className="flex flex-wrap gap-2">
                   {REGION_CHIPS.map((chip) => {
@@ -934,11 +978,12 @@ export const BrainExplorerSection: React.FC<BrainExplorerSectionProps> = ({
                       <button
                         key={chip.id}
                         type="button"
+                        aria-pressed={active}
                         onClick={() => handleSelectRegion(chip.id)}
-                        className={`apple-pill-btn min-h-[44px] px-3.5 py-2 text-[0.875rem] font-semibold cursor-pointer ${
+                        className={`apple-pill-btn min-h-[48px] px-4 py-2 text-[1rem] font-semibold cursor-pointer text-left ${
                           active
                             ? 'bg-[#1F6F63] text-white hc-primary-btn'
-                            : 'bg-[#F2F7F6] dark:bg-[#0B1220] text-[#0F1F2E] dark:text-slate-100'
+                            : 'bg-[#F2F7F6] dark:bg-[#0B1220] text-[#0F1F2E] dark:text-slate-100 hover:bg-[#E3F1ED] dark:hover:bg-[#112A27]'
                         }`}
                       >
                         {isTa ? chip.ta : chip.en}
@@ -1134,10 +1179,10 @@ export const BrainExplorerSection: React.FC<BrainExplorerSectionProps> = ({
                   </div>
 
                   <div className="rounded-2xl bg-white dark:bg-[#111A2B] p-5 space-y-2">
-                    <span className="text-[0.875rem] font-semibold text-[#1F6F63] dark:text-[#2DD4BF] block">
+                    <span className="text-[1rem] font-semibold text-[#1F6F63] dark:text-[#2DD4BF] block">
                       {isTa ? currentStep.tag_ta : currentStep.tag_en}
                     </span>
-                    <h3 className="text-lg sm:text-xl font-semibold text-[#0F1F2E] dark:text-white leading-snug">
+                    <h3 className="text-xl sm:text-2xl font-semibold text-[#0F1F2E] dark:text-white leading-snug">
                       {isTa ? currentStep.heading_ta : currentStep.heading_en}
                     </h3>
                     <p className="text-[1.125rem] text-[#3A4753] dark:text-[#D3DFE9] leading-relaxed">
@@ -1151,7 +1196,7 @@ export const BrainExplorerSection: React.FC<BrainExplorerSectionProps> = ({
                         key={idx}
                         type="button"
                         onClick={() => handleStepSelect(idx)}
-                        className={`apple-pill-btn min-h-[48px] px-3 py-2 text-[0.875rem] font-semibold cursor-pointer ${
+                        className={`apple-pill-btn min-h-[48px] px-3 py-2 text-[1rem] font-semibold cursor-pointer ${
                           stepIndex === idx
                             ? 'bg-[#1F6F63] text-white hc-primary-btn'
                             : 'bg-white dark:bg-[#111A2B] text-[#0F1F2E] dark:text-slate-200'

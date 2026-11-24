@@ -2,17 +2,23 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   AlertTriangle,
   ArrowRight,
+  BookOpen,
   Brain,
   CheckCircle2,
   ChevronDown,
   ChevronRight,
+  Compass,
   Droplet,
   Dumbbell,
+  HeartHandshake,
   Lock,
   MessageSquare,
   PhoneCall,
   Pill,
   ShieldCheck,
+  Sparkles,
+  Stethoscope,
+  Users,
 } from 'lucide-react';
 import { Language, RESOURCE_ARTICLES, ResourceId } from '../data/rehabContent';
 import { HeroBrainPreviewController, initHeroBrainPreview } from '../stroke3d';
@@ -206,40 +212,53 @@ export const AppleHeroSection: React.FC<{
           <h1 className="apple-hero-title text-[#0F1F2E] dark:text-white headline-balance tamil-safe">
             {isTa ? (
               <>
-                உங்கள் மீட்புப் பயணம்,{' '}
-                <span className="apple-headline-gradient">அழகாக வழிகாட்டப்படுகிறது.</span>
+                பக்கவாத மீட்பைப் புரிந்துகொள்ளுங்கள்.{' '}
+                <span className="apple-headline-gradient">வழிகாட்டுதலுடன் மீளவும்.</span>
               </>
             ) : (
               <>
-                Your recovery,{' '}
-                <span className="apple-headline-gradient">beautifully guided.</span>
+                Understand Stroke Recovery.{' '}
+                <span className="apple-headline-gradient">Learn. Explore. Recover with Guidance.</span>
               </>
             )}
           </h1>
 
-          <p className="text-[1.25rem] font-normal text-[#3A4753] dark:text-[#D3DFE9] max-w-2xl mx-auto leading-[1.6] min-w-0 [overflow-wrap:anywhere]">
+          <p className="text-[1.25rem] font-normal text-[#3A4753] dark:text-[#D3DFE9] max-w-2xl mx-auto leading-[1.65] min-w-0 [overflow-wrap:anywhere]">
             {isTa
-              ? 'உடற்பயிற்சி, மருந்துகள், பேச்சுப் பயிற்சி மற்றும் 3D மூளை விளக்கத்தை ஒரே அமைதியான இடத்தில் வழங்குகிறது.'
-              : 'Calm daily guidance for physiotherapy, medications, hydration, speech practice, and 3D neuro-care.'}
+              ? 'பக்கவாதத்தால் பாதிக்கப்பட்டவர்கள், முதியவர்கள் மற்றும் குடும்பப் பராமரிப்பாளர்களுக்காக எளிய மீட்புத் தகவல்கள், வழிகாட்டிகள் மற்றும் ஊடாடும் 3D மூளை விளக்கங்களை ஒரே இடத்தில் வழங்குகிறது.'
+              : 'Explore simple stroke recovery information, educational guides, and interactive 3D resources designed to support patients and caregivers.'}
           </p>
 
-          {/* Two Clear Actions: One Primary Teal Pill + One Secondary Chevron Link */}
-          <div className="pt-3 flex flex-wrap items-center justify-center gap-5 sm:gap-7">
+          {/* Clear Primary CTA + Secondary CTA */}
+          <div className="pt-3 flex flex-wrap items-center justify-center gap-4 sm:gap-6">
             <a
-              href="#dashboard"
+              href="#recovery-journey"
               className="apple-pill-btn min-h-[56px] px-8 py-3.5 bg-[#1F6F63] hover:bg-[#17574D] dark:bg-[#1F6F63] dark:hover:bg-[#17574D] text-white text-[1.125rem] font-semibold inline-flex items-center justify-center gap-2.5 shadow-[0_8px_24px_rgba(31,111,99,0.28)] hc-primary-btn"
             >
-              <span>{isTa ? 'இன்றைய மீட்பைத் தொடங்குக' : 'Explore StrokeCare AI'}</span>
+              <span>{isTa ? 'மீட்பு வழிகாட்டியைத் தொடங்குக' : 'Start Recovery Guide'}</span>
+              <ArrowRight className="w-5 h-5 shrink-0" aria-hidden="true" />
             </a>
 
             <a
-              href="#features-bento"
-              className="min-h-[56px] px-3 py-2 text-[#1F6F63] dark:text-[#2DD4BF] hover:underline text-[1.125rem] font-semibold inline-flex items-center justify-center gap-1"
+              href="#brain-explorer"
+              className="apple-pill-btn min-h-[56px] px-7 py-3 border-2 border-[#1F6F63] dark:border-[#2DD4BF] text-[#1F6F63] dark:text-[#2DD4BF] hover:bg-[#E3F1ED] dark:hover:bg-[#112A27] text-[1.125rem] font-semibold inline-flex items-center justify-center gap-1.5"
             >
-              <span>{isTa ? 'மேலும் அறிக' : 'Learn more'}</span>
+              <span>{isTa ? '3D வழிகாட்டியைப் பார்க்க' : 'Explore 3D Guide'}</span>
               <ChevronRight className="w-5 h-5 shrink-0" aria-hidden="true" />
             </a>
           </div>
+
+          <p className="text-[1rem] text-[#3A4753] dark:text-[#D3DFE9] pt-1 max-w-2xl mx-auto leading-relaxed">
+            {isTa
+              ? 'மருத்துவர் அல்லது மறுவாழ்வு சிகிச்சைக்கு மாற்றல்ல — எளிய கல்வி மற்றும் தினசரி வீட்டுத் துணை மட்டுமே. '
+              : 'Educational guide only — does not replace doctors, prescriptions, or professional rehabilitation. '}
+            <a
+              href="#risk-assessment"
+              className="font-semibold text-[#C81E1E] dark:text-red-300 hover:underline whitespace-nowrap"
+            >
+              {isTa ? 'திடீர் அறிகுறிகளா? F.A.S.T. சரிபார்க்க →' : 'Sudden symptoms? F.A.S.T. Check →'}
+            </a>
+          </p>
         </div>
 
         {/* Centered Realistic 3D Brain on Dark Rounded Panel (#0B1220) With Soft Teal Glow */}
@@ -254,7 +273,7 @@ export const AppleHeroSection: React.FC<{
             }}
           />
 
-          <div className="relative z-10 h-[340px] sm:h-[440px] lg:h-[500px] w-full flex items-center justify-center">
+          <div className="relative z-10 h-[320px] sm:h-[420px] lg:h-[460px] w-full flex items-center justify-center">
             {!webglFallback ? (
               <div
                 ref={mountRef}
@@ -284,8 +303,8 @@ export const AppleHeroSection: React.FC<{
           <div className="relative z-10 px-6 sm:px-8 py-5 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-left bg-[#0B1220]/85">
             <p className="text-[1.125rem] font-normal text-slate-200 min-w-0 [overflow-wrap:anywhere]">
               {isTa
-                ? 'மருத்துவரின் ஆலோசனையுடன் இணைந்து செயல்படும் கல்வி மற்றும் தினசரி மீட்புத் துணை.'
-                : 'Built for survivors and caregivers to follow daily recovery clearly.'}
+                ? 'நோயாளிகள், முதியவர்கள் மற்றும் பராமரிப்பாளர்கள் தினசரிப் படிகளை எளிதில் பின்பற்ற உருவாக்கப்பட்டது.'
+                : 'Built for stroke survivors, older adults, and caregivers to learn and track daily care step by step.'}
             </p>
             <div className="flex flex-wrap items-center gap-4 shrink-0">
               <button
@@ -293,13 +312,13 @@ export const AppleHeroSection: React.FC<{
                 onClick={onOpenPersonalize}
                 className="min-h-[56px] px-5 py-2 rounded-full bg-white/10 hover:bg-white/16 text-white text-[1rem] font-semibold cursor-pointer"
               >
-                {isTa ? 'திட்டம் அமைக்க' : 'Personalize'}
+                {isTa ? 'பெயர் & திட்டம் அமைக்க' : 'Personalize Plan'}
               </button>
               <a
-                href="#brain-explorer"
+                href="#dashboard"
                 className="min-h-[56px] px-2 text-[#2DD4BF] hover:underline text-[1.125rem] font-semibold inline-flex items-center gap-1 whitespace-nowrap"
               >
-                <span>{isTa ? '3D மூளை திறக்க' : 'Explore 3D Brain'}</span>
+                <span>{isTa ? 'இன்றைய நிலை பார்' : 'Open Daily Tracker'}</span>
                 <ChevronRight className="w-5 h-5 shrink-0" aria-hidden="true" />
               </a>
             </div>
@@ -311,19 +330,277 @@ export const AppleHeroSection: React.FC<{
 };
 
 /* ============================================================================
- * 02. FEATURES 2×3 BENTO GRID (MIXED LARGE & SMALL TILES ON #F2F7F6)
+ * 01B. 6-STEP STROKE RECOVERY LEARNING JOURNEY (#recovery-journey)
+ * ========================================================================= */
+interface JourneyStep {
+  stepNumber: number;
+  title_ta: string;
+  title_en: string;
+  summary_ta: string;
+  summary_en: string;
+  bullets_ta: string[];
+  bullets_en: string[];
+  cta_ta: string;
+  cta_en: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string; 'aria-hidden'?: boolean }>;
+  onNavigate?: () => void;
+  urgent?: boolean;
+}
+
+export const StrokeRecoveryJourneySection: React.FC<{
+  lang: Language;
+  onOpenStrokeSteps: () => void;
+}> = ({ lang, onOpenStrokeSteps }) => {
+  const isTa = lang === 'ta';
+
+  const steps: JourneyStep[] = [
+    {
+      stepNumber: 1,
+      title_ta: 'பக்கவாதத்தைப் புரிந்துகொள்ளுங்கள்',
+      title_en: 'Understand Stroke',
+      summary_ta: 'மூளையின் ஒரு பகுதிக்குச் செல்லும் ரத்த ஓட்டம் திடீரென நிற்கும்போது அல்லது ரத்தக் குழாய் உடையும்போது பக்கவாதம் ஏற்படுகிறது.',
+      summary_en: 'A stroke happens when blood flow to part of the brain is blocked or a blood vessel bleeds, cutting off oxygen.',
+      bullets_ta: [
+        'அடைப்பு (Ischemic): ரத்தக் கட்டி மூளை ரத்தக்குழாயை அடைக்கிறது.',
+        'ரத்தக் கசிவு (Hemorrhagic): பலவீனமான ரத்தக்குழாய் உடைந்து ரத்தம் கசிகிறது.',
+      ],
+      bullets_en: [
+        'Blocked blood flow (Ischemic): A clot narrows or blocks an artery.',
+        'Bleeding (Hemorrhagic): A weakened vessel leaks blood into brain tissue.',
+      ],
+      cta_ta: 'பக்கவாதப் படிகளை 3D-யில் பார்',
+      cta_en: 'See How Stroke Happens',
+      href: '#brain-explorer',
+      icon: BookOpen,
+      onNavigate: onOpenStrokeSteps,
+    },
+    {
+      stepNumber: 2,
+      title_ta: 'மீட்பு எவ்வாறு நடக்கிறது என அறிக',
+      title_en: 'Learn About Recovery',
+      summary_ta: 'மூளை புதிய இணைப்புகளை உருவாக்கிக்கொள்ளும் திறன் கொண்டது. ஆனால் ஒவ்வொரு நபரின் மீட்பு வேகமும் கால அளவும் மாறுபடும்.',
+      summary_en: 'The brain can build new pathways through steady practice, though every survivor heals at a different pace.',
+      bullets_ta: [
+        'ஒரே நேர அட்டவணை அனைவருக்கும் பொருந்தாது — உங்கள் மருத்துவரின் இலக்குகளைப் பின்பற்றுங்கள்.',
+        'சிறிய தினசரிப் பயிற்சிகள் மற்றும் போதுமான ஓய்வு காலப்போக்கில் உதவும்.',
+      ],
+      bullets_en: [
+        'No two recovery timelines are the same — progress depends on individual health and care.',
+        'Gentle daily repetition alongside rest supports gradual improvement.',
+      ],
+      cta_ta: 'தினசரி முன்னேற்றத்தைப் பார்',
+      cta_en: 'Open Daily Progress Tracker',
+      href: '#dashboard',
+      icon: Sparkles,
+    },
+    {
+      stepNumber: 3,
+      title_ta: 'உடல் & மூளை வழிகாட்டியைப் பாருங்கள்',
+      title_en: 'Explore the Body Guide',
+      summary_ta: 'மூளையின் எந்தப் பகுதி கை, கால், பேச்சு அல்லது பார்வையைக் கட்டுப்படுத்துகிறது என்பதை எளிய சொற்களில் அறியலாம்.',
+      summary_en: 'See how different brain areas link to arm movement, walking balance, vision, and speaking in plain language.',
+      bullets_ta: [
+        '3D மாதிரியைச் சுழற்ற விருப்பம் இல்லாவிட்டாலும், கீழே உள்ள எளிய உரை மற்றும் குரல் விளக்கத்தைப் படிக்கலாம்.',
+        'இடது மூளை பாதிப்பு பொதுவாக வலது பக்க உடலைப் பாதிக்கலாம்.',
+      ],
+      bullets_en: [
+        'Read every region summary in plain text or audio — using 3D rotation is always optional.',
+        'Damage on one side of the brain often affects movement on the opposite side of the body.',
+      ],
+      cta_ta: '3D உடல் & மூளை வழிகாட்டியைத் திற',
+      cta_en: 'Open 3D Body Guide',
+      href: '#brain-explorer',
+      icon: Compass,
+    },
+    {
+      stepNumber: 4,
+      title_ta: 'மறுவாழ்வுப் பயிற்சிகளைப் புரிந்துகொள்ளுங்கள்',
+      title_en: 'Understand Rehabilitation',
+      summary_ta: 'மருந்துகள், உடற்பயிற்சி, தண்ணீர் மற்றும் பேச்சுப் பயிற்சி ஆகியவை மருத்துவ சிகிச்சையுடன் இணைந்து செயல்படும் தினசரி பழக்கங்கள்.',
+      summary_en: 'Daily home routines reinforce the rehabilitation plan given by your doctor, physiotherapist, and speech therapist.',
+      bullets_ta: [
+        'மெதுவான 5-நொடி உடற்பயிற்சி மற்றும் நேரப்படி மருந்து சரிபார்ப்பு.',
+        'பேச்சுப் பயிற்சி அட்டைகள் மூலம் முக்கிய வார்த்தைகளை அமைதியாகத் திரும்பச் சொல்லுதல்.',
+      ],
+      bullets_en: [
+        'Guided 5-second movement holds, hydration logs, and scheduled medication checklists.',
+        'Slow-paced speech cards to practice everyday words without rushing.',
+      ],
+      cta_ta: 'தினசரி பயிற்சிகளுக்குச் செல்ல',
+      cta_en: 'Start Daily Care Routines',
+      href: '#physio-section',
+      icon: Stethoscope,
+    },
+    {
+      stepNumber: 5,
+      title_ta: 'பராமரிப்பாளர்கள் உதவும் எளிய வழிகள்',
+      title_en: 'Learn How Caregivers Can Help',
+      summary_ta: 'குடும்ப உறுப்பினர்கள் பொறுமை, பாதுகாப்பான வீட்டுச் சூழல் மற்றும் தெளிவான தொடர்பு மூலம் பெரிய நம்பிக்கை அளிக்க முடியும்.',
+      summary_en: 'Family members make a daily difference through calm communication, fall safety, and steady encouragement.',
+      bullets_ta: [
+        'சிறிய வாக்கியங்களில் மெதுவாகப் பேசி, பதில் சொல்ல போதிய நேரம் கொடுங்கள்.',
+        'வீட்டில் தடுக்கி விழும் பொருட்களை அகற்றி, தினசரி மருந்து நேரங்களைக் கண்காணிக்கவும்.',
+      ],
+      bullets_en: [
+        'Speak slowly using short sentences and allow unhurried time for replies.',
+        'Keep walkways clutter-free and help log medications and doctor questions.',
+      ],
+      cta_ta: 'நோயாளி & பராமரிப்பாளர் வழிகாட்டிகள்',
+      cta_en: 'Read Caregiver Guides',
+      href: '#resources-section',
+      icon: Users,
+    },
+    {
+      stepNumber: 6,
+      title_ta: 'எப்போது அவசர மருத்துவ உதவி பெற வேண்டும்',
+      title_en: 'Know When to Seek Medical Help',
+      summary_ta: 'புதிய பக்கவாத அறிகுறிகள் திடீரெனத் தோன்றினால் ஒரு நொடியும் தாமதிக்காமல் அவசர ஆம்புலன்ஸ் 108-ஐ அழைக்கவும்.',
+      summary_en: 'Never wait to see if sudden warning signs pass. Call emergency services (108) or go to a hospital right away.',
+      bullets_ta: [
+        'F.A.S.T.: முகம் சாய்தல், கை பலவீனம், பேச்சு குழறுதல் — உடனே 108.',
+        'திடீர் தலைச்சுற்றல், மங்கலான பார்வை அல்லது கடுமையான தலைவலியும் அவசர அறிகுறிகளே.',
+      ],
+      bullets_en: [
+        'F.A.S.T.: Sudden face droop, arm weakness, or slurred speech means call 108 now.',
+        'Sudden vision trouble, severe headache, or sudden loss of balance also need urgent care.',
+      ],
+      cta_ta: 'F.A.S.T. அவசர சோதனையைத் திற',
+      cta_en: 'Check F.A.S.T. Warning Signs',
+      href: '#risk-assessment',
+      icon: PhoneCall,
+      urgent: true,
+    },
+  ];
+
+  return (
+    <section
+      id="recovery-journey"
+      className="w-full bg-[#F2F7F6] dark:bg-[#0B1220] apple-section-pad"
+    >
+      <div className="max-w-[1100px] mx-auto px-4 sm:px-6 space-y-12">
+        <ScrollReveal className="max-w-3xl space-y-4 min-w-0">
+          <span className="inline-flex items-center gap-2 text-[1rem] font-semibold text-[#1F6F63] dark:text-[#2DD4BF]">
+            <HeartHandshake className="w-5 h-5 shrink-0" aria-hidden="true" />
+            <span>{isTa ? '6 எளிய படிகளில் கற்றல் பாதை' : 'Step-by-Step Recovery Learning Flow'}</span>
+          </span>
+          <h2 className="apple-section-title text-[#0F1F2E] dark:text-white headline-balance tamil-safe">
+            {isTa ? (
+              <>
+                புரிந்துகொள்வதில் தொடங்கி,{' '}
+                <span className="apple-headline-gradient">படிப்படியாக முன்னேறுங்கள்.</span>
+              </>
+            ) : (
+              <>
+                A clear path from{' '}
+                <span className="apple-headline-gradient">understanding to daily care.</span>
+              </>
+            )}
+          </h2>
+          <p className="text-[1.125rem] sm:text-[1.25rem] font-normal text-[#3A4753] dark:text-[#D3DFE9] leading-[1.65] min-w-0 [overflow-wrap:anywhere]">
+            {isTa
+              ? 'இந்த 6 படிகள் நோயாளிகள் மற்றும் குடும்பத்தினர் குழப்பமின்றி அடிப்படைகளை அறிய உதவும். ஒவ்வொருவரின் மீட்புக் காலமும் வேறுபட்டது — உங்கள் மருத்துவரின் ஆலோசனையே முதன்மையானது.'
+              : 'Follow these 6 plain-language steps in order, or jump to what you need today. Every survivor’s recovery timeline is unique and guided by their medical team.'}
+          </p>
+        </ScrollReveal>
+
+        <ol className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+          {steps.map((step, idx) => {
+            const Icon = step.icon;
+            return (
+              <ScrollReveal key={step.stepNumber} delayMs={idx * 40} className="flex min-w-0">
+                <li
+                  className={`clinical-card hc-card p-7 w-full flex flex-col justify-between gap-5 min-w-0 ${
+                    step.urgent
+                      ? 'ring-2 ring-[#C81E1E]/60 bg-red-50/70 dark:bg-red-950/25'
+                      : ''
+                  }`}
+                >
+                  <div className="space-y-4 min-w-0">
+                    <div className="flex items-center justify-between gap-3">
+                      <span
+                        className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[1rem] font-semibold ${
+                          step.urgent
+                            ? 'bg-[#C81E1E] text-white'
+                            : 'bg-[#E3F1ED] dark:bg-[#112A27] text-[#1F6F63] dark:text-[#2DD4BF]'
+                        }`}
+                      >
+                        <Icon className="w-4 h-4 shrink-0" aria-hidden={true} />
+                        <span>{isTa ? `படி ${step.stepNumber}` : `Step ${step.stepNumber}`}</span>
+                      </span>
+                    </div>
+
+                    <h3 className="text-[1.375rem] font-semibold text-[#0F1F2E] dark:text-white leading-snug min-w-0 [overflow-wrap:anywhere]">
+                      {isTa ? step.title_ta : step.title_en}
+                    </h3>
+
+                    <p className="text-[1.125rem] font-normal text-[#0F1F2E] dark:text-slate-100 leading-[1.6] min-w-0 [overflow-wrap:anywhere]">
+                      {isTa ? step.summary_ta : step.summary_en}
+                    </p>
+
+                    <ul className="space-y-2 pt-1">
+                      {(isTa ? step.bullets_ta : step.bullets_en).map((bullet, bIdx) => (
+                        <li
+                          key={bIdx}
+                          className="text-[1rem] font-normal text-[#3A4753] dark:text-[#D3DFE9] leading-[1.55] flex items-start gap-2.5 min-w-0 [overflow-wrap:anywhere]"
+                        >
+                          <span
+                            aria-hidden="true"
+                            className={`font-bold mt-0.5 shrink-0 ${
+                              step.urgent
+                                ? 'text-[#C81E1E] dark:text-red-300'
+                                : 'text-[#1F6F63] dark:text-[#2DD4BF]'
+                            }`}
+                          >
+                            •
+                          </span>
+                          <span>{bullet}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <a
+                    href={step.href}
+                    onClick={step.onNavigate}
+                    className={`min-h-[48px] inline-flex items-center justify-between gap-2 pt-3 border-t border-[var(--border-subtle)] text-[1.0625rem] font-semibold hover:underline ${
+                      step.urgent
+                        ? 'text-[#C81E1E] dark:text-red-300'
+                        : 'text-[#1F6F63] dark:text-[#2DD4BF]'
+                    }`}
+                  >
+                    <span>{isTa ? step.cta_ta : step.cta_en}</span>
+                    <ArrowRight className="w-5 h-5 shrink-0" aria-hidden="true" />
+                  </a>
+                </li>
+              </ScrollReveal>
+            );
+          })}
+        </ol>
+      </div>
+    </section>
+  );
+};
+
+/* ============================================================================
+ * 02. FEATURES 2×3 BENTO GRID (MIXED LARGE & SMALL TILES)
  * ========================================================================= */
 export const FeaturesBentoSection: React.FC<{
   lang: Language;
   onJumpBrain: () => void;
   onOpenLegal: (type: 'privacy' | 'terms' | 'disclaimer') => void;
-}> = ({ lang, onJumpBrain, onOpenLegal }) => {
+  surface?: 'canvas' | 'mint';
+}> = ({ lang, onJumpBrain, onOpenLegal, surface = 'canvas' }) => {
   const isTa = lang === 'ta';
+  const bgClass =
+    surface === 'mint'
+      ? 'bg-[#F2F7F6] dark:bg-[#0B1220]'
+      : 'bg-[#FBFBFD] dark:bg-[#000000]';
 
   return (
     <section
       id="features-bento"
-      className="w-full bg-[#F2F7F6] dark:bg-[#0B1220] apple-section-pad"
+      className={`w-full ${bgClass} apple-section-pad`}
     >
       <div className="max-w-[1100px] mx-auto px-4 sm:px-6 space-y-12 sm:space-y-14">
         {/* One Idea Chapter Header */}
@@ -772,10 +1049,7 @@ export const ClinicalInsightsSection: React.FC<{
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 items-stretch">
           {RESOURCE_ARTICLES.map((article, idx) => (
             <ScrollReveal key={article.id} delayMs={idx * 60} className="flex min-w-0">
-              <article
-                onClick={() => onSelectArticle(article.id)}
-                className="clinical-card clinical-card-interactive hc-card overflow-hidden flex flex-col h-full w-full cursor-pointer min-w-0"
-              >
+              <article className="relative clinical-card clinical-card-interactive hc-card overflow-hidden flex flex-col h-full w-full min-w-0">
                 <div className="aspect-[16/10] w-full bg-slate-900 overflow-hidden shrink-0">
                   <img
                     src={article.image}
@@ -783,14 +1057,14 @@ export const ClinicalInsightsSection: React.FC<{
                     loading="lazy"
                     decoding="async"
                     referrerPolicy="no-referrer"
-                    className="w-full h-full object-cover transition-transform duration-500 ease-out hover:scale-[1.03]"
+                    className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
                   />
                 </div>
                 <div className="p-6 flex flex-col flex-1 gap-3 min-w-0">
-                  <span className="text-[0.875rem] font-semibold text-[#1F6F63] dark:text-[#2DD4BF] block truncate min-w-0">
+                  <span className="text-[1rem] font-semibold text-[#1F6F63] dark:text-[#2DD4BF] block truncate min-w-0">
                     {isTa ? article.category_ta : article.category_en}
                   </span>
-                  <h3 className="text-[1.125rem] font-semibold text-[#0F1F2E] dark:text-white leading-[1.35] line-clamp-3 min-w-0 [overflow-wrap:anywhere] py-[0.05em]">
+                  <h3 className="text-[1.25rem] font-semibold text-[#0F1F2E] dark:text-white leading-[1.35] line-clamp-3 min-w-0 [overflow-wrap:anywhere] py-[0.05em]">
                     {isTa ? article.title_ta : article.title_en}
                   </h3>
                   <p className="text-[1.125rem] font-normal text-[#3A4753] dark:text-[#D3DFE9] leading-[1.55] line-clamp-3 min-w-0 [overflow-wrap:anywhere]">
@@ -798,13 +1072,11 @@ export const ClinicalInsightsSection: React.FC<{
                   </p>
                   <button
                     type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onSelectArticle(article.id);
-                    }}
-                    className="mt-auto pt-2 inline-flex items-center gap-1 text-[1.125rem] font-semibold text-[#1F6F63] dark:text-[#2DD4BF] hover:underline cursor-pointer self-start min-h-[56px]"
+                    onClick={() => onSelectArticle(article.id)}
+                    aria-label={isTa ? `${article.title_ta} — படிக்க` : `Read guide: ${article.title_en}`}
+                    className="mt-auto pt-2 inline-flex items-center gap-1 text-[1.125rem] font-semibold text-[#1F6F63] dark:text-[#2DD4BF] hover:underline cursor-pointer self-start min-h-[56px] after:absolute after:inset-0"
                   >
-                    <span>{isTa ? 'படிக்க' : 'Read guide'}</span>
+                    <span>{isTa ? 'வழிகாட்டி படிக்க' : 'Read guide'}</span>
                     <ChevronRight className="w-5 h-5 shrink-0" aria-hidden="true" />
                   </button>
                 </div>
@@ -856,9 +1128,42 @@ export const FaqSection: React.FC<{ lang: Language }> = ({ lang }) => {
       id="faq-section"
       className="w-full bg-[#F2F7F6] dark:bg-[#0B1220] apple-section-pad"
     >
-      <div className="max-w-[900px] mx-auto px-4 sm:px-6 space-y-10">
-        <ScrollReveal className="space-y-4 text-center">
+      <div className="max-w-[960px] mx-auto px-4 sm:px-6 space-y-10">
+        {/* About StrokeCare AI Overview Card */}
+        <ScrollReveal className="clinical-card hc-card p-6 sm:p-8 space-y-4">
+          <span className="inline-flex items-center gap-2 text-[1rem] font-semibold text-[#1F6F63] dark:text-[#2DD4BF]">
+            <ShieldCheck className="w-5 h-5 shrink-0" aria-hidden="true" />
+            <span>{isTa ? 'StrokeCare AI பற்றி' : 'About StrokeCare AI'}</span>
+          </span>
           <h2 className="apple-section-title text-[#0F1F2E] dark:text-white headline-balance tamil-safe">
+            {isTa ? (
+              <>
+                அமைதியான உதவி,{' '}
+                <span className="apple-headline-gradient">எல்லோருக்கும் எளிதாக.</span>
+              </>
+            ) : (
+              <>
+                Built for calm clarity,{' '}
+                <span className="apple-headline-gradient">for survivors &amp; families.</span>
+              </>
+            )}
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
+            <p className="text-[1.125rem] text-[#3A4753] dark:text-[#D3DFE9] leading-[1.65]">
+              {isTa
+                ? 'StrokeCare AI என்பது பக்கவாதத்திற்குப் பிந்தைய மீட்பில் உள்ளவர்கள், முதியவர்கள் மற்றும் பராமரிப்பாளர்கள் தினசரிப் பயிற்சிகள், மருந்துகள் மற்றும் மூளைக் கல்வியை எளிய தமிழ் மற்றும் ஆங்கிலத்தில் பின்பற்ற உதவும் கல்வித் தளமாகும்.'
+                : 'StrokeCare AI helps stroke survivors, older adults, and family caregivers follow plain-language stroke education, 3D anatomy guides, and calm daily routines in English and Tamil.'}
+            </p>
+            <p className="text-[1.125rem] text-[#3A4753] dark:text-[#D3DFE9] leading-[1.65]">
+              {isTa
+                ? 'இது மருத்துவர்கள், பிசியோதெரபி அல்லது பேச்சு சிகிச்சைக்கு மாற்றல்ல. அனைத்துப் பதிவுகளும் உங்கள் சாதனத்தில் மட்டுமே பாதுகாப்பாகச் சேமிக்கப்படுகின்றன.'
+                : 'It does not replace doctors, prescribed medicines, or professional rehabilitation. Your personal progress and notes stay privately stored on your own device.'}
+            </p>
+          </div>
+        </ScrollReveal>
+
+        <ScrollReveal className="space-y-4 text-center pt-2">
+          <h3 className="text-[1.75rem] sm:text-[2.25rem] font-semibold text-[#0F1F2E] dark:text-white headline-balance tamil-safe">
             {isTa ? (
               <>
                 கேள்விகளுக்குத்{' '}
@@ -870,7 +1175,7 @@ export const FaqSection: React.FC<{ lang: Language }> = ({ lang }) => {
                 <span className="apple-headline-gradient">clearly answered.</span>
               </>
             )}
-          </h2>
+          </h3>
         </ScrollReveal>
 
         <div className="clinical-card hc-card p-6 sm:p-8 divide-y divide-[var(--border-subtle)]">

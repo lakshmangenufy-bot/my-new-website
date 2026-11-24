@@ -96,8 +96,8 @@ export const MedicationSection: React.FC<MedicationSectionProps> = ({
           </div>
           <p className="text-[1.125rem] text-[#3A4753] dark:text-[#D3DFE9]">
             {isTa
-              ? 'உங்கள் மருத்துவரின் பரிந்துரையைப் பின்பற்றவும். மாத்திரை எடுத்ததும் தொடவும்.'
-              : 'Follow your doctor’s prescription. Check off each dose as you take it.'}
+              ? 'மாதிரி மறுவாழ்வு அட்டவணை: உங்கள் மருத்துவர் எழுதிய மருந்து மற்றும் அளவை மட்டுமே பின்பற்றவும்.'
+              : 'Sample recovery checklist: verify exact tablets and dosages with your doctor’s actual prescription.'}
           </p>
         </div>
 
@@ -523,8 +523,8 @@ export const MedicationSection: React.FC<MedicationSectionProps> = ({
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-2 border-t border-[var(--border-subtle)] text-[1rem] text-[#3A4753] dark:text-[#D3DFE9]">
         <p className="font-medium">
           {isTa
-            ? 'குறிப்பு: எப்போதும் உங்கள் மருத்துவரின் பரிந்துரைப்படி மட்டுமே மாத்திரைகளை உட்கொள்ளவும்.'
-            : 'Follow your doctor’s prescription.'}
+            ? 'கல்வி வழிகாட்டி மட்டுமே: எப்போதும் உங்கள் மருத்துவரின் பரிந்துரைப்படி மட்டுமே மாத்திரைகளை உட்கொள்ளவும்.'
+            : 'Educational checklist template only — always follow your doctor’s prescribed medications and dosages.'}
         </p>
         {medicationHistory.length > 0 && (
           <span className="tabular-nums font-medium">

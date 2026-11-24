@@ -8,6 +8,7 @@ import {
   Droplet,
   Dumbbell,
   Flame,
+  Globe,
   HeartPulse,
   Languages,
   Menu,
@@ -35,6 +36,7 @@ import {
   requestBrowserNotificationPermission,
 } from './med-reminders';
 import {
+  EXERCISES_LIST,
   ExerciseId,
   HistoryEntry,
   Language,
@@ -46,6 +48,7 @@ import {
   ThemeMode,
 } from './data/rehabContent';
 import { playSoftTone, speakBilingual } from './utils/audioSpeech';
+import { downloadRecoverySummaryPdf } from './utils/recoveryPdfExport';
 import type { BrainModeTab } from './components/BrainExplorerSection';
 const BrainExplorerSection = lazy(() =>
   import('./components/BrainExplorerSection').then((m) => ({
@@ -81,6 +84,7 @@ import {
   FaqSection,
   FeaturesBentoSection,
   ScrollReveal,
+  StrokeRecoveryJourneySection,
   StrokeRiskAwarenessSection,
 } from './components/AppleStorySections';
 
@@ -90,6 +94,8 @@ interface AppState {
   textSize: TextSizeMode;
   highContrast: boolean;
   profileName: string;
+  caregiverName: string;
+  caregiverPhone: string;
   recoveryFocus: 'mobility' | 'speech' | 'medications' | 'brain';
   exercises: Record<ExerciseId, boolean>;
   medications: Record<MedicationId, boolean>;
@@ -112,6 +118,8 @@ const DEFAULT_STATE: AppState = {
   textSize: 'normal',
   highContrast: false,
   profileName: '',
+  caregiverName: '',
+  caregiverPhone: '',
   recoveryFocus: 'mobility',
   exercises: { ex1: false, ex2: false, ex3: false },
   medications: { med1: false, med2: false, med3: false, med4: false },
@@ -152,6 +160,8 @@ function loadInitialState(): AppState {
     const rawWater = Number(parsed.waterCount);
     const waterCount = Number.isFinite(rawWater) ? Math.max(0, Math.min(8, Math.round(rawWater))) : 0;
     const profileName = typeof parsed.profileName === 'string' ? parsed.profileName.slice(0, 40) : '';
+    const caregiverName = typeof parsed.caregiverName === 'string' ? parsed.caregiverName.slice(0, 40) : '';
+    const caregiverPhone = typeof parsed.caregiverPhone === 'string' ? parsed.caregiverPhone.slice(0, 24) : '';
 
     return {
       ...DEFAULT_STATE,
@@ -160,6 +170,8 @@ function loadInitialState(): AppState {
       textSize,
       highContrast: Boolean(parsed.highContrast),
       profileName,
+      caregiverName,
+      caregiverPhone,
       recoveryFocus,
       waterCount,
       exercises: {
@@ -275,6 +287,7 @@ export default function App() {
 
   const [alertModalPeriod, setAlertModalPeriod] = useState<MedicationPeriod | null>(null);
   const [alertBannerPeriod, setAlertBannerPeriod] = useState<MedicationPeriod | null>(null);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
 
   const [toast, setToast] = useState<{ msg: string; variant: 'teal' | 'success' | 'warning' | 'danger' } | null>(null);
   const toastTimerRef = useRef<number | null>(null);
@@ -755,73 +768,103 @@ export default function App() {
     notify('குறிப்பு அழிக்கப்பட்டது', 'Personal note cleared', 'teal');
   };
 
-  const handleDownloadRecoverySummary = () => {
-    const summaryPayload = {
-      app: 'StrokeCare AI',
-      exportedAt: new Date().toISOString(),
-      dateKey: todayDateKey,
-      profile: {
-        name: state.profileName.trim() || null,
-        recoveryFocus: state.recoveryFocus,
-        language: state.language,
-      },
-      dailyProgress: {
-        completionPercent: progressPct,
-        milestonesCompleted: finishedMilestones,
-        totalMilestones,
-        exercises: {
-          completed: exDone,
-          total: 3,
-          items: state.exercises,
-        },
-        medications: {
-          taken: medDone,
-          total: 4,
-          items: state.medications,
-        },
-        hydration: {
-          glassesConsumed: state.waterCount,
-          dailyGoal: 8,
-          goalMet: waterGoalMet === 1,
-        },
-        speechPractice: {
-          practicedCount: state.practicedSpeechIds.length,
-          totalWords: SPEECH_WORDS.length,
-          goalMet: speechGoalMet === 1,
-          practicedWordIds: state.practicedSpeechIds,
-        },
-      },
-      weeklyProgressByDate: state.dailyProgressByDate,
-      activeDates: state.activeDates,
-      notes: {
-        todayNote: state.dailyNotesByDate[todayDateKey] ?? null,
-        notesByDate: state.dailyNotesByDate,
-      },
-      activityLogs: {
-        exercises: state.exerciseHistory,
-        medications: state.medicationHistory,
-        hydration: state.waterHistory,
-      },
-    };
-
-    const jsonString = JSON.stringify(summaryPayload, null, 2);
-    const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
+  const handleDownloadRecoverySummary = async () => {
+    if (isExportingPdf) return;
+    setIsExportingPdf(true);
     try {
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `strokecare-recovery-summary-${todayDateKey}.json`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+      const now = new Date();
+      const locale = isTa ? 'ta-IN' : 'en-US';
+      const formattedDate = now.toLocaleDateString(locale, {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      });
+      const exportedAtLabel = now.toLocaleTimeString(locale, {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+
+      const weekDaysMeta = getCurrentWeekDays(state.language);
+      const weekDays = weekDaysMeta.map((d) => ({
+        shortLabel: d.shortLabel,
+        pct: d.isFuture ? 0 : d.isToday ? progressPct : state.dailyProgressByDate[d.dateKey] ?? 0,
+        isToday: d.isToday,
+        isFuture: d.isFuture,
+      }));
+
+      const recentNotes = weekDaysMeta
+        .filter((d) => !d.isFuture && Boolean(state.dailyNotesByDate[d.dateKey]?.text?.trim()))
+        .map((d) => {
+          const noteEntry = state.dailyNotesByDate[d.dateKey];
+          return {
+            dateKey: d.dateKey,
+            label: d.fullLabel,
+            text: noteEntry.text,
+            updatedAt: noteEntry.updatedAt,
+          };
+        });
+
+      const practicedWordLabels = SPEECH_WORDS.filter((w) =>
+        state.practicedSpeechIds.includes(w.id)
+      ).map((w) => (isTa ? w.word_ta : w.word_en));
+
+      await downloadRecoverySummaryPdf({
+        lang: state.language,
+        dateKey: todayDateKey,
+        formattedDate,
+        exportedAtLabel,
+        profileName: state.profileName,
+        caregiverName: state.caregiverName,
+        caregiverPhone: state.caregiverPhone,
+        recoveryFocus: state.recoveryFocus,
+        progressPct,
+        finishedMilestones,
+        totalMilestones,
+        exercises: EXERCISES_LIST.map((ex) => ({
+          title_ta: ex.title_ta,
+          title_en: ex.title_en,
+          reps_ta: ex.reps_ta,
+          reps_en: ex.reps_en,
+          done: Boolean(state.exercises[ex.id]),
+        })),
+        medications: MEDICATION_ITEMS.map((med) => ({
+          name_ta: med.name_ta,
+          name_en: med.name_en,
+          periodLabel_ta:
+            med.period === 'morning' ? 'காலை' : med.period === 'afternoon' ? 'மதியம்' : 'இரவு',
+          periodLabel_en:
+            med.period === 'morning'
+              ? 'Morning'
+              : med.period === 'afternoon'
+              ? 'Afternoon'
+              : 'Night',
+          taken: Boolean(state.medications[med.id]),
+        })),
+        waterCount: state.waterCount,
+        waterGoal: 8,
+        practicedSpeechCount: state.practicedSpeechIds.length,
+        totalSpeechCount: SPEECH_WORDS.length,
+        practicedWordLabels,
+        todayNote: state.dailyNotesByDate[todayDateKey] ?? null,
+        recentNotes,
+        weekDays,
+      });
+
       playSoftTone(660, 0.14);
       notify(
-        'மீட்பு சுருக்க JSON கோப்பு பதிவிறக்கம் செய்யப்பட்டது!',
-        'Recovery summary downloaded as JSON!',
+        'மீட்பு சுருக்க PDF கோப்பு பதிவிறக்கம் செய்யப்பட்டது!',
+        'Recovery summary downloaded as PDF!',
         'success'
       );
+    } catch {
+      notify(
+        'PDF உருவாக்குவதில் சிக்கல் ஏற்பட்டது. மீண்டும் முயற்சிக்கவும்.',
+        'Could not create PDF right now. Please try again.',
+        'danger'
+      );
     } finally {
-      URL.revokeObjectURL(url);
+      setIsExportingPdf(false);
     }
   };
 
@@ -865,16 +908,24 @@ export default function App() {
     : null;
 
   const navItems = [
-    { href: '#features-bento', ta: 'சிறப்புகள்', en: 'Overview' },
-    { href: '#dashboard', ta: 'தினசரி நிலை', en: 'Progress' },
-    { href: '#tasks-section', ta: 'பணிகள்', en: 'Tasks' },
-    { href: '#ai-companion', ta: '3D AI உதவி', en: '3D AI Chat' },
-    { href: '#brain-explorer', ta: '3D மூளை', en: '3D Brain' },
-    { href: '#physio-section', ta: 'பயிற்சி & மருந்து', en: 'Daily Care' },
+    { href: '#hero', ta: 'முகப்பு', en: 'Home' },
+    { href: '#recovery-journey', ta: 'மீட்பு வழிகாட்டி', en: 'Stroke Recovery Guide' },
+    { href: '#brain-explorer', ta: '3D உடல் வழிகாட்டி', en: '3D Body Guide' },
+    { href: '#resources-section', ta: 'வளங்கள்', en: 'Patient & Caregiver Resources' },
+    { href: '#faq-section', ta: 'பற்றி', en: 'About' },
   ];
 
+  const cleanCaregiverPhone = state.caregiverPhone.trim();
+  const hasCaregiverPhone = cleanCaregiverPhone.replace(/[^\d+]/g, '').length >= 7;
+
   return (
-    <div className="min-h-screen flex flex-col pb-24">
+    <div className="min-h-screen flex flex-col pb-28 md:pb-0">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[60] focus:px-5 focus:py-3 focus:rounded-full focus:bg-[#1F6F63] focus:text-white focus:font-semibold focus:shadow-lg"
+      >
+        {isTa ? 'முதன்மை உள்ளடக்கத்திற்குச் செல்' : 'Skip to main content'}
+      </a>
       {/* Live Toast */}
       {toast && (
         <div
@@ -898,13 +949,13 @@ export default function App() {
       )}
 
       {/* =====================================================================
-          APPLE-INSPIRED FROSTED GLASS NAVBAR (64px sticky, centered links)
+          APPLE-INSPIRED FROSTED GLASS NAVBAR (64px sticky, 5 essential links)
          ===================================================================== */}
       <header
         style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
         className="sticky top-0 z-40 min-h-[64px] bg-white/72 dark:bg-[#0B1220]/78 border-b border-black/10 dark:border-white/10"
       >
-        <div className="max-w-[1100px] mx-auto px-3 sm:px-6 min-h-[64px] flex items-center justify-between gap-2 sm:gap-4">
+        <div className="max-w-[1260px] mx-auto px-3 sm:px-6 min-h-[64px] flex items-center justify-between gap-2 sm:gap-4">
           {/* Left: Brand Mark */}
           <a href="#hero" className="flex items-center gap-2.5 shrink-0 py-1 min-w-0">
             <div className="w-9 h-9 rounded-xl bg-[#1F6F63] text-white flex items-center justify-center shrink-0">
@@ -915,13 +966,13 @@ export default function App() {
             </span>
           </a>
 
-          {/* Center: 16px Weight 500 Links */}
-          <nav aria-label="Main Navigation" className="hidden xl:flex items-center justify-center gap-6">
+          {/* Center: 5 Essential Links aligned cleanly from lg (>=1024px) */}
+          <nav aria-label="Main Navigation" className="hidden lg:flex items-center justify-center gap-3.5 xl:gap-6">
             {navItems.map((item) => (
               <a
                 key={item.href}
                 href={item.href}
-                className="text-[1rem] font-medium text-[#0F1F2E] dark:text-slate-100 hover:text-[#1F6F63] dark:hover:text-[#2DD4BF] whitespace-nowrap shrink-0"
+                className="text-[0.9375rem] xl:text-[1rem] font-medium text-[#0F1F2E] dark:text-slate-100 hover:text-[#1F6F63] dark:hover:text-[#2DD4BF] whitespace-nowrap shrink-0 py-2"
               >
                 {isTa ? item.ta : item.en}
               </a>
@@ -939,7 +990,7 @@ export default function App() {
                 type="button"
                 onClick={() => state.language !== 'en' && handleToggleLanguage()}
                 aria-pressed={!isTa}
-                className={`min-h-[40px] px-3 py-1 rounded-full text-[0.875rem] font-semibold cursor-pointer whitespace-nowrap transition-colors ${
+                className={`min-h-[40px] px-3 py-1 rounded-full text-[0.9375rem] font-semibold cursor-pointer whitespace-nowrap transition-colors ${
                   !isTa
                     ? 'bg-[#1F6F63] text-white hc-primary-btn'
                     : 'text-[#0F1F2E] dark:text-slate-200 hover:text-[#1F6F63]'
@@ -951,7 +1002,7 @@ export default function App() {
                 type="button"
                 onClick={() => state.language !== 'ta' && handleToggleLanguage()}
                 aria-pressed={isTa}
-                className={`min-h-[40px] px-3 py-1 rounded-full text-[0.875rem] font-semibold cursor-pointer whitespace-nowrap transition-colors ${
+                className={`min-h-[40px] px-3 py-1 rounded-full text-[0.9375rem] font-semibold cursor-pointer whitespace-nowrap transition-colors ${
                   isTa
                     ? 'bg-[#1F6F63] text-white hc-primary-btn'
                     : 'text-[#0F1F2E] dark:text-slate-200 hover:text-[#1F6F63]'
@@ -968,7 +1019,8 @@ export default function App() {
               className="hidden md:inline-flex min-h-[48px] px-4 py-2 rounded-full bg-[#C81E1E] hover:bg-[#A61717] text-white text-[0.9375rem] font-semibold items-center gap-2 cursor-pointer whitespace-nowrap shrink-0"
             >
               <PhoneCall className="w-4 h-4 shrink-0" aria-hidden="true" />
-              <span>{isTa ? 'அவசர SOS 108' : 'Emergency SOS 108'}</span>
+              <span className="xl:hidden">{isTa ? 'SOS 108' : 'SOS 108'}</span>
+              <span className="hidden xl:inline">{isTa ? 'அவசர SOS 108' : 'Emergency SOS 108'}</span>
             </button>
 
             <button
@@ -976,7 +1028,7 @@ export default function App() {
               onClick={() => setMobileMenuOpen(true)}
               aria-expanded={mobileMenuOpen}
               aria-label={isTa ? 'வழிசெலுத்தல் பட்டியல்' : 'Open menu'}
-              className="xl:hidden w-12 h-12 rounded-full bg-[#F2F7F6] dark:bg-[#111A2B] flex items-center justify-center text-[#0F1F2E] dark:text-white cursor-pointer shrink-0"
+              className="lg:hidden w-12 h-12 rounded-full bg-[#F2F7F6] dark:bg-[#111A2B] flex items-center justify-center text-[#0F1F2E] dark:text-white cursor-pointer shrink-0"
             >
               <Menu className="w-6 h-6" />
             </button>
@@ -990,7 +1042,7 @@ export default function App() {
           role="dialog"
           aria-modal="true"
           aria-label={isTa ? 'முழுத் திரை வழிசெலுத்தல்' : 'Full-screen Navigation'}
-          className="xl:hidden fixed inset-0 z-50 bg-[#FBFBFD]/98 dark:bg-[#0B1220]/98 backdrop-blur-xl flex flex-col justify-between p-6 overflow-y-auto"
+          className="lg:hidden fixed inset-0 z-50 bg-[#FBFBFD]/98 dark:bg-[#0B1220]/98 backdrop-blur-xl flex flex-col justify-between p-6 overflow-y-auto"
         >
           <div className="flex items-center justify-between gap-4">
             <span className="text-[1.25rem] font-semibold text-[#0F1F2E] dark:text-white">
@@ -1006,30 +1058,53 @@ export default function App() {
             </button>
           </div>
 
-          <nav aria-label="Mobile Navigation" className="my-8 flex flex-col gap-3">
-            {[
-              { href: '#hero', ta: 'முகப்பு', en: 'Home' },
-              { href: '#features-bento', ta: 'அம்சங்கள்', en: 'Overview' },
-              { href: '#dashboard', ta: 'தினசரி முன்னேற்றம்', en: 'Daily Progress' },
-              { href: '#ai-companion', ta: '3D AI உதவியாளர்', en: '3D AI Care Assistant' },
-              { href: '#brain-explorer', ta: '3D மூளை ஆய்வு', en: '3D Brain Explorer' },
-              { href: '#physio-section', ta: 'உடற்பயிற்சி', en: 'Physiotherapy' },
-              { href: '#medicine-section', ta: 'மருந்து அட்டவணை', en: 'Medications' },
-              { href: '#hydration-section', ta: 'தண்ணீர் & உணவு', en: 'Hydration & Diet' },
-              { href: '#speech-section', ta: 'பேச்சுப் பயிற்சி', en: 'Speech Practice' },
-              { href: '#tasks-section', ta: 'Google Tasks பணிகள்', en: 'Google Tasks' },
-              { href: '#resources-section', ta: 'வழிகாட்டிகள்', en: 'Patient Guides' },
-            ].map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className="min-h-[56px] px-5 py-3 rounded-2xl bg-[#F2F7F6] dark:bg-[#111A2B] text-[1.25rem] font-semibold text-[#0F1F2E] dark:text-white flex items-center justify-between"
-              >
-                <span>{isTa ? item.ta : item.en}</span>
-                <ChevronRight className="w-5 h-5 text-[#1F6F63] dark:text-[#2DD4BF]" aria-hidden="true" />
-              </a>
-            ))}
+          <nav aria-label="Mobile Navigation" className="my-6 space-y-6">
+            <div className="space-y-2.5">
+              <p className="text-[1rem] font-semibold text-[#3A4753] dark:text-[#D3DFE9] px-1">
+                {isTa ? 'முதன்மைப் பிரிவுகள்' : 'Main Sections'}
+              </p>
+              <div className="flex flex-col gap-2.5">
+                {navItems.map((item) => (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="min-h-[56px] px-5 py-3 rounded-2xl bg-[#E3F1ED] dark:bg-[#112A27] text-[1.1875rem] font-semibold text-[#0F1F2E] dark:text-white flex items-center justify-between"
+                  >
+                    <span>{isTa ? item.ta : item.en}</span>
+                    <ChevronRight className="w-5 h-5 text-[#1F6F63] dark:text-[#2DD4BF]" aria-hidden="true" />
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2.5">
+              <p className="text-[1rem] font-semibold text-[#3A4753] dark:text-[#D3DFE9] px-1">
+                {isTa ? 'தினசரிப் பராமரிப்புக் கருவிகள்' : 'Daily Care Tools'}
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {[
+                  { href: '#dashboard', ta: 'தினசரி முன்னேற்றம்', en: 'Daily Progress' },
+                  { href: '#physio-section', ta: 'உடற்பயிற்சி', en: 'Physiotherapy' },
+                  { href: '#medicine-section', ta: 'மருந்து அட்டவணை', en: 'Medications' },
+                  { href: '#hydration-section', ta: 'தண்ணீர் & உணவு', en: 'Hydration & Diet' },
+                  { href: '#speech-section', ta: 'பேச்சுப் பயிற்சி', en: 'Speech Practice' },
+                  { href: '#tasks-section', ta: 'Google Tasks பணிகள்', en: 'Google Tasks' },
+                  { href: '#ai-companion', ta: '3D AI உதவியாளர்', en: '3D AI Care Assistant' },
+                  { href: '#risk-assessment', ta: 'F.A.S.T. அறிகுறி சோதனை', en: 'F.A.S.T. Emergency Check' },
+                ].map((item) => (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="min-h-[56px] px-5 py-3 rounded-2xl bg-[#F2F7F6] dark:bg-[#111A2B] text-[1.0625rem] font-semibold text-[#0F1F2E] dark:text-white flex items-center justify-between"
+                  >
+                    <span>{isTa ? item.ta : item.en}</span>
+                    <ChevronRight className="w-5 h-5 text-[#1F6F63] dark:text-[#2DD4BF]" aria-hidden="true" />
+                  </a>
+                ))}
+              </div>
+            </div>
           </nav>
 
           <button
@@ -1046,24 +1121,31 @@ export default function App() {
         </div>
       )}
 
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
         {/* 01. HERO (#FBFBFD) */}
         <AppleHeroSection
           lang={state.language}
           onOpenPersonalize={() => setPersonalizeOpen(true)}
         />
 
-        {/* 02. FEATURES 2×3 BENTO GRID (#F2F7F6) */}
+        {/* 01B. 6-STEP STROKE RECOVERY LEARNING FLOW (#F2F7F6) */}
+        <StrokeRecoveryJourneySection
+          lang={state.language}
+          onOpenStrokeSteps={() => setBrainTab('stroke_flow')}
+        />
+
+        {/* 02. FEATURES 2×3 BENTO GRID (#FBFBFD) */}
         <FeaturesBentoSection
           lang={state.language}
+          surface="canvas"
           onJumpBrain={() => setBrainTab('anatomy')}
           onOpenLegal={(t) => setLegalModalType(t)}
         />
 
-        {/* 03. TRACK PROGRESS / APPLE HEALTH SUMMARY DASHBOARD (#FBFBFD) */}
+        {/* 03. TRACK PROGRESS / APPLE HEALTH SUMMARY DASHBOARD (#F2F7F6) */}
         <section
           id="dashboard"
-          className="w-full bg-[#FBFBFD] dark:bg-[#000000] apple-section-pad"
+          className="w-full bg-[#F2F7F6] dark:bg-[#0B1220] apple-section-pad"
         >
           <div className="max-w-[1100px] mx-auto px-4 sm:px-6 space-y-12">
             {/* Single Chapter Headline + 1 Supporting Sentence */}
@@ -1090,7 +1172,7 @@ export default function App() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
               {/* Left Card: Vertically Stacked Progress Ring (180px) */}
               <div className="lg:col-span-5 min-w-0 clinical-card hc-card p-8 flex flex-col items-center text-center gap-5">
-                <div className="inline-flex flex-wrap items-center justify-center gap-2 text-[0.875rem] font-medium text-[#3A4753] dark:text-[#D3DFE9] min-w-0 max-w-full [overflow-wrap:anywhere]">
+                <div className="inline-flex flex-wrap items-center justify-center gap-2 text-[1rem] font-medium text-[#3A4753] dark:text-[#D3DFE9] min-w-0 max-w-full [overflow-wrap:anywhere]">
                   <CalendarCheck className="w-4 h-4 shrink-0 text-[#1F6F63] dark:text-[#2DD4BF]" aria-hidden="true" />
                   <span>
                     {new Date().toLocaleDateString(isTa ? 'ta-IN' : 'en-US', {
@@ -1129,7 +1211,7 @@ export default function App() {
                       suffix="%"
                       className="text-[2.35rem] font-semibold text-[#0F1F2E] dark:text-white leading-none"
                     />
-                    <span className="text-[0.875rem] font-medium text-[#3A4753] dark:text-[#D3DFE9] mt-1 max-w-[7.25rem] [overflow-wrap:anywhere]">
+                    <span className="text-[1rem] font-medium text-[#3A4753] dark:text-[#D3DFE9] mt-1 max-w-[7.25rem] [overflow-wrap:anywhere]">
                       {isTa ? 'நிறைவு' : 'Complete'}
                     </span>
                   </div>
@@ -1144,10 +1226,19 @@ export default function App() {
                 <button
                   type="button"
                   onClick={handleDownloadRecoverySummary}
-                  className="apple-pill-btn w-full min-h-[56px] px-5 py-3 border-2 border-[#1F6F63] dark:border-[#2DD4BF] bg-[#E3F1ED]/70 dark:bg-[#112A27]/80 hover:bg-[#E3F1ED] dark:hover:bg-[#112A27] text-[1.0625rem] font-semibold text-[#1F6F63] dark:text-[#2DD4BF] inline-flex items-center justify-center gap-2 cursor-pointer [overflow-wrap:anywhere] text-center"
+                  disabled={isExportingPdf}
+                  className="apple-pill-btn w-full min-h-[56px] px-5 py-3 border-2 border-[#1F6F63] dark:border-[#2DD4BF] bg-[#E3F1ED]/70 dark:bg-[#112A27]/80 hover:bg-[#E3F1ED] dark:hover:bg-[#112A27] disabled:opacity-65 text-[1.0625rem] font-semibold text-[#1F6F63] dark:text-[#2DD4BF] inline-flex items-center justify-center gap-2 cursor-pointer [overflow-wrap:anywhere] text-center"
                 >
                   <Download className="w-5 h-5 shrink-0" aria-hidden="true" />
-                  <span>{isTa ? 'மீட்பு சுருக்கத்தைப் பதிவிறக்கு (JSON)' : 'Download Recovery Summary'}</span>
+                  <span>
+                    {isExportingPdf
+                      ? isTa
+                        ? 'PDF தயாராகிறது...'
+                        : 'Preparing PDF...'
+                      : isTa
+                      ? 'மீட்பு சுருக்கத்தைப் பதிவிறக்கு (PDF)'
+                      : 'Download Recovery Summary (PDF)'}
+                  </span>
                 </button>
               </div>
 
@@ -1246,7 +1337,7 @@ export default function App() {
                                 className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#1F6F63] dark:bg-[#2DD4BF]"
                               />
                             )}
-                            <span className="text-[0.875rem] font-medium leading-tight max-w-full [overflow-wrap:anywhere]">
+                            <span className="text-[0.9375rem] font-medium leading-tight max-w-full [overflow-wrap:anywhere]">
                               {day.shortLabel}
                             </span>
 
@@ -1509,7 +1600,7 @@ export default function App() {
                   href="#hydration-section"
                   className="min-h-[56px] inline-flex items-center justify-between gap-2 text-[1.125rem] font-semibold text-[#1F6F63] dark:text-[#2DD4BF] hover:underline"
                 >
-                  <span>{isTa ? '+1 டம்ளர் சேர்' : 'Add Water'}</span>
+                  <span>{isTa ? 'தண்ணீர் பதியவும்' : 'Track Water'}</span>
                   <ChevronRight className="w-5 h-5 shrink-0" aria-hidden="true" />
                 </a>
               </div>
@@ -1873,32 +1964,35 @@ export default function App() {
                   : 'Your exercises, medication logs, and hydration data stay privately stored on your own device.'}
               </p>
               <nav aria-label="Footer Quick Links" className="pt-1 flex flex-wrap gap-x-4 gap-y-2 text-[1rem] font-medium text-[#1F6F63] dark:text-[#2DD4BF]">
-                <a href="#features-bento" className="hover:underline">
-                  {isTa ? 'அம்சங்கள்' : 'Overview'}
+                <a href="#hero" className="hover:underline">
+                  {isTa ? 'முகப்பு' : 'Home'}
                 </a>
-                <a href="#ai-companion" className="hover:underline">
-                  {isTa ? '3D AI உதவி' : '3D AI Chat'}
+                <a href="#recovery-journey" className="hover:underline">
+                  {isTa ? 'மீட்பு வழிகாட்டி' : 'Stroke Recovery Guide'}
                 </a>
                 <a href="#brain-explorer" className="hover:underline">
-                  {isTa ? '3D மூளை' : '3D Brain'}
+                  {isTa ? '3D உடல் வழிகாட்டி' : '3D Body Guide'}
+                </a>
+                <a href="#resources-section" className="hover:underline">
+                  {isTa ? 'வளங்கள்' : 'Patient & Caregiver Resources'}
                 </a>
                 <a href="#dashboard" className="hover:underline">
-                  {isTa ? 'முன்னேற்றம்' : 'Progress'}
+                  {isTa ? 'முன்னேற்றம்' : 'Daily Progress'}
                 </a>
-                <a href="#tasks-section" className="hover:underline">
-                  {isTa ? 'பணிகள்' : 'Tasks'}
+                <a href="#risk-assessment" className="hover:underline">
+                  {isTa ? 'F.A.S.T. சோதனை' : 'F.A.S.T. Check'}
                 </a>
                 <a href="#faq-section" className="hover:underline">
-                  {isTa ? 'கேள்விகள்' : 'FAQ'}
+                  {isTa ? 'பற்றி & கேள்விகள்' : 'About & FAQ'}
                 </a>
               </nav>
             </div>
 
-            {/* Emergency Numbers (108 + Caregiver) */}
+            {/* Emergency Numbers (108 + Configurable Caregiver) */}
             <div className="lg:col-span-4 space-y-3">
-              <h4 className="text-[1.125rem] font-semibold text-[#0F1F2E] dark:text-white">
+              <h3 className="text-[1.125rem] font-semibold text-[#0F1F2E] dark:text-white">
                 {isTa ? 'அவசர உதவி & பராமரிப்பாளர்' : 'Emergency & Caregiver Numbers'}
-              </h4>
+              </h3>
               <div className="space-y-3 text-[1rem]">
                 <a
                   href="tel:108"
@@ -1907,21 +2001,34 @@ export default function App() {
                   <span>{isTa ? 'ஆம்புலன்ஸ் அவசர எண்' : 'Emergency Ambulance'}</span>
                   <span className="tabular-nums text-lg">108</span>
                 </a>
-                <a
-                  href="tel:+919876543210"
-                  className="apple-pill-btn min-h-[56px] flex items-center justify-between px-5 py-3 bg-white dark:bg-[#111A2B] text-[#0F1F2E] dark:text-white font-semibold"
-                >
-                  <span>{isTa ? 'குடும்பப் பராமரிப்பாளர்' : 'Family Caregiver'}</span>
-                  <span className="tabular-nums">+91 98765 43210</span>
-                </a>
+                {hasCaregiverPhone ? (
+                  <a
+                    href={`tel:${cleanCaregiverPhone.replace(/[^\d+]/g, '')}`}
+                    className="apple-pill-btn min-h-[56px] flex items-center justify-between px-5 py-3 bg-white dark:bg-[#111A2B] text-[#0F1F2E] dark:text-white font-semibold hover:ring-2 hover:ring-[#1F6F63]"
+                  >
+                    <span className="truncate pr-2">
+                      {state.caregiverName.trim() || (isTa ? 'குடும்பப் பராமரிப்பாளர்' : 'Family Caregiver')}
+                    </span>
+                    <span className="tabular-nums shrink-0">{cleanCaregiverPhone}</span>
+                  </a>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setPersonalizeOpen(true)}
+                    className="apple-pill-btn w-full min-h-[56px] flex items-center justify-between px-5 py-3 bg-white dark:bg-[#111A2B] border border-dashed border-[#1F6F63]/45 dark:border-[#2DD4BF]/45 text-[#1F6F63] dark:text-[#2DD4BF] font-semibold cursor-pointer hover:bg-[#E3F1ED] dark:hover:bg-[#112A27]"
+                  >
+                    <span>{isTa ? 'குடும்பப் பராமரிப்பாளர் எண் சேர்க்க' : 'Add Family Caregiver Number'}</span>
+                    <span className="text-[1rem] font-semibold">{isTa ? 'அமைக்க' : 'Set Up'}</span>
+                  </button>
+                )}
               </div>
             </div>
 
             {/* Caregiver Tips + Language Toggle */}
             <div className="lg:col-span-4 space-y-3">
-              <h4 className="text-[1.125rem] font-semibold text-[#0F1F2E] dark:text-white">
+              <h3 className="text-[1.125rem] font-semibold text-[#0F1F2E] dark:text-white">
                 {isTa ? 'பராமரிப்பாளர் குறிப்புகள்' : 'Caregiver Guidance'}
-              </h4>
+              </h3>
               <ul className="space-y-2 text-[1rem] text-[#3A4753] dark:text-[#D3DFE9] leading-relaxed">
                 <li>
                   •{' '}
@@ -1964,8 +2071,8 @@ export default function App() {
           <div className="border-t border-[var(--border-subtle)] pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-[1rem] text-[#3A4753] dark:text-[#D3DFE9]">
             <span className="font-medium">
               {isTa
-                ? 'உங்கள் மருத்துவரின் பரிந்துரையைப் பின்பற்றவும்.'
-                : 'Follow your doctor’s prescription.'}
+                ? 'கல்வி மற்றும் தினசரி மறுவாழ்வுத் துணை மட்டுமே · எப்போதும் உங்கள் மருத்துவரின் ஆலோசனையைப் பின்பற்றவும்.'
+                : 'Educational recovery guide only · Always follow your doctor’s medical advice.'}
             </span>
             <div className="flex flex-wrap items-center gap-5 font-medium">
               <button
@@ -1989,6 +2096,54 @@ export default function App() {
               >
                 {isTa ? 'மருத்துவ மறுப்பு' : 'Disclaimer'}
               </button>
+            </div>
+          </div>
+          <div className="border-t border-[var(--border-subtle)] pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+            <div className="space-y-1">
+              <p className="text-[1rem] text-[#3A4753] dark:text-[#D3DFE9]">
+                Designed &amp; Developed by{' '}
+                <span className="font-semibold text-[#0F1F2E] dark:text-white">Lakshmanan</span>
+              </p>
+              <p className="text-[1rem] font-medium text-[#1F6F63] dark:text-[#2DD4BF]">
+                UI/UX Designer &amp; AI Developer
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:items-end items-center gap-3">
+              <div className="flex items-center gap-3">
+                <a
+                  href="https://www.linkedin.com/in/lakshmanan-p-aba07133a/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Visit Lakshmanan's LinkedIn profile"
+                  title="Visit Lakshmanan's LinkedIn profile"
+                  className="w-11 h-11 rounded-full bg-white dark:bg-[#111A2B] border border-[var(--border-subtle)] text-[#0A66C2] dark:text-[#60A5FA] hover:bg-[#0A66C2] hover:text-white hover:border-[#0A66C2] dark:hover:bg-[#0A66C2] dark:hover:text-white transition-all duration-200 hover:-translate-y-0.5 flex items-center justify-center cursor-pointer shadow-xs"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="w-5 h-5"
+                    aria-hidden="true"
+                  >
+                    <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z" />
+                  </svg>
+                </a>
+
+                <a
+                  href="https://spectacular-lebkuchen-72e0ed.netlify.app/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="View Lakshmanan's portfolio"
+                  title="View Lakshmanan's portfolio"
+                  className="w-11 h-11 rounded-full bg-white dark:bg-[#111A2B] border border-[var(--border-subtle)] text-[#1F6F63] dark:text-[#2DD4BF] hover:bg-[#1F6F63] hover:text-white hover:border-[#1F6F63] dark:hover:bg-[#2DD4BF] dark:hover:text-[#0B1220] transition-all duration-200 hover:-translate-y-0.5 flex items-center justify-center cursor-pointer shadow-xs"
+                >
+                  <Globe className="w-5 h-5" aria-hidden="true" />
+                </a>
+              </div>
+
+              <p className="text-[1rem] text-[#3A4753] dark:text-[#D3DFE9]">
+                © 2026 StrokeCare AI. All rights reserved.
+              </p>
             </div>
           </div>
         </div>
@@ -2026,7 +2181,14 @@ export default function App() {
       />
 
       {/* Modals */}
-      <SosModal open={sosOpen} lang={state.language} onClose={() => setSosOpen(false)} />
+      <SosModal
+        open={sosOpen}
+        lang={state.language}
+        caregiverName={state.caregiverName}
+        caregiverPhone={state.caregiverPhone}
+        onConfigureCaregiver={() => setPersonalizeOpen(true)}
+        onClose={() => setSosOpen(false)}
+      />
 
       <MedAlertModal
         period={alertModalPeriod}
@@ -2042,8 +2204,16 @@ export default function App() {
         lang={state.language}
         initialName={state.profileName}
         initialFocus={state.recoveryFocus}
-        onSave={(name, focus) => {
-          setState((prev) => ({ ...prev, profileName: name, recoveryFocus: focus }));
+        initialCaregiverName={state.caregiverName}
+        initialCaregiverPhone={state.caregiverPhone}
+        onSave={(name, focus, caregiverName, caregiverPhone) => {
+          setState((prev) => ({
+            ...prev,
+            profileName: name,
+            recoveryFocus: focus,
+            caregiverName,
+            caregiverPhone,
+          }));
           setPersonalizeOpen(false);
           const targetMap = {
             mobility: 'physio-section',

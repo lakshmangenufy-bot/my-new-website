@@ -192,8 +192,11 @@ export const FloatingAccessibilityMenu: React.FC<FloatingAccessibilityMenuProps>
 export const SosModal: React.FC<{
   open: boolean;
   lang: Language;
+  caregiverName?: string;
+  caregiverPhone?: string;
+  onConfigureCaregiver?: () => void;
   onClose: () => void;
-}> = ({ open, lang, onClose }) => {
+}> = ({ open, lang, caregiverName, caregiverPhone, onConfigureCaregiver, onClose }) => {
   const isTa = lang === 'ta';
   const [sirenOn, setSirenOn] = useState(false);
   const timerRef = useRef<number | null>(null);
@@ -207,9 +210,13 @@ export const SosModal: React.FC<{
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [open]);
+  }, [open, sirenOn]);
 
   if (!open) return null;
+
+  const cleanPhone = (caregiverPhone || '').trim();
+  const hasCaregiverPhone = cleanPhone.replace(/[^\d+]/g, '').length >= 7;
+  const displayCaregiver = (caregiverName || '').trim() || (isTa ? 'குடும்பப் பராமரிப்பாளர்' : 'Family Caregiver');
 
   const toggleSiren = () => {
     if (!sirenOn) {
@@ -279,22 +286,45 @@ export const SosModal: React.FC<{
             </span>
           </a>
 
-          <a
-            href="tel:+919876543210"
-            className="flex items-center justify-between p-4 min-h-[64px] rounded-2xl bg-[#F2F7F6] dark:bg-[#0B1220]"
-          >
-            <div>
-              <span className="text-lg font-semibold text-[#0F1F2E] dark:text-white block">
-                {isTa ? 'குடும்பப் பராமரிப்பாளர்' : 'Family Caregiver'}
+          {hasCaregiverPhone ? (
+            <a
+              href={`tel:${cleanPhone.replace(/[^\d+]/g, '')}`}
+              className="flex items-center justify-between p-4 min-h-[64px] rounded-2xl bg-[#F2F7F6] dark:bg-[#0B1220] hover:ring-2 hover:ring-[#1F6F63]"
+            >
+              <div className="min-w-0 pr-3">
+                <span className="text-lg font-semibold text-[#0F1F2E] dark:text-white block truncate">
+                  {displayCaregiver}
+                </span>
+                <span className="tabular-nums text-[1rem] text-[#3A4753] dark:text-[#D3DFE9]">
+                  {cleanPhone}
+                </span>
+              </div>
+              <span className="px-4 py-2 rounded-full bg-[#1F6F63] text-white font-semibold text-base hc-primary-btn shrink-0">
+                {isTa ? 'அழைக்க' : 'Call'}
               </span>
-              <span className="tabular-nums text-[1rem] text-[#3A4753] dark:text-[#D3DFE9]">
-                +91 98765 43210
+            </a>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                onConfigureCaregiver?.();
+              }}
+              className="w-full text-left flex items-center justify-between gap-3 p-4 min-h-[64px] rounded-2xl bg-[#F2F7F6] dark:bg-[#0B1220] border border-dashed border-[#1F6F63]/45 dark:border-[#2DD4BF]/45 hover:bg-[#E3F1ED] dark:hover:bg-[#112A27] cursor-pointer"
+            >
+              <div className="min-w-0">
+                <span className="text-lg font-semibold text-[#0F1F2E] dark:text-white block">
+                  {isTa ? 'குடும்பப் பராமரிப்பாளர் எண்' : 'Family Caregiver Contact'}
+                </span>
+                <span className="text-[0.9375rem] text-[#3A4753] dark:text-[#D3DFE9]">
+                  {isTa ? 'உங்கள் அவசர எண்ணை இங்கே சேமிக்கவும்' : 'Add your trusted caregiver phone number'}
+                </span>
+              </div>
+              <span className="px-4 py-2 rounded-full bg-[#1F6F63] text-white font-semibold text-base hc-primary-btn shrink-0">
+                {isTa ? 'சேர்' : 'Set Up'}
               </span>
-            </div>
-            <span className="px-4 py-2 rounded-full bg-[#1F6F63] text-white font-semibold text-base hc-primary-btn">
-              {isTa ? 'அழைக்க' : 'Call'}
-            </span>
-          </a>
+            </button>
+          )}
         </div>
 
         <button
@@ -439,18 +469,38 @@ export const PersonalizeModal: React.FC<{
   lang: Language;
   initialName: string;
   initialFocus: 'mobility' | 'speech' | 'medications' | 'brain';
-  onSave: (name: string, focus: 'mobility' | 'speech' | 'medications' | 'brain') => void;
+  initialCaregiverName?: string;
+  initialCaregiverPhone?: string;
+  onSave: (
+    name: string,
+    focus: 'mobility' | 'speech' | 'medications' | 'brain',
+    caregiverName: string,
+    caregiverPhone: string
+  ) => void;
   onClose: () => void;
-}> = ({ open, lang, initialName, initialFocus, onSave, onClose }) => {
+}> = ({
+  open,
+  lang,
+  initialName,
+  initialFocus,
+  initialCaregiverName = '',
+  initialCaregiverPhone = '',
+  onSave,
+  onClose,
+}) => {
   const [name, setName] = useState(initialName);
   const [focus, setFocus] = useState(initialFocus);
+  const [caregiverName, setCaregiverName] = useState(initialCaregiverName);
+  const [caregiverPhone, setCaregiverPhone] = useState(initialCaregiverPhone);
 
   useEffect(() => {
     if (open) {
       setName(initialName);
       setFocus(initialFocus);
+      setCaregiverName(initialCaregiverName);
+      setCaregiverPhone(initialCaregiverPhone);
     }
-  }, [open, initialName, initialFocus]);
+  }, [open, initialName, initialFocus, initialCaregiverName, initialCaregiverPhone]);
 
   if (!open) return null;
   const isTa = lang === 'ta';
@@ -465,7 +515,7 @@ export const PersonalizeModal: React.FC<{
       }}
       className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
     >
-      <div className="bg-white dark:bg-[#111A2B] rounded-[28px] max-w-md w-full p-6 sm:p-8 shadow-2xl space-y-5">
+      <div className="bg-white dark:bg-[#111A2B] rounded-[28px] max-w-md w-full p-6 sm:p-8 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
         <div className="flex items-start justify-between gap-3">
           <div>
             <span className="text-[1rem] font-semibold text-[#1F6F63] dark:text-[#2DD4BF]">
@@ -479,7 +529,7 @@ export const PersonalizeModal: React.FC<{
             type="button"
             onClick={onClose}
             aria-label={isTa ? 'மூடு' : 'Close'}
-            className="w-12 h-12 rounded-full bg-[#F2F7F6] dark:bg-[#0B1220] flex items-center justify-center text-[#3A4753] dark:text-[#D3DFE9] cursor-pointer"
+            className="w-12 h-12 rounded-full bg-[#F2F7F6] dark:bg-[#0B1220] flex items-center justify-center text-[#3A4753] dark:text-[#D3DFE9] cursor-pointer shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
@@ -488,7 +538,12 @@ export const PersonalizeModal: React.FC<{
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            onSave(name.trim().slice(0, 40), focus);
+            onSave(
+              name.trim().slice(0, 40),
+              focus,
+              caregiverName.trim().slice(0, 40),
+              caregiverPhone.trim().slice(0, 24)
+            );
           }}
           className="space-y-4"
         >
@@ -522,6 +577,38 @@ export const PersonalizeModal: React.FC<{
               <option value="medications">{isTa ? 'மாத்திரைகள் & தண்ணீர்' : 'Medications & Hydration'}</option>
               <option value="brain">{isTa ? '3D மூளை கல்வி' : '3D Brain & Stroke Education'}</option>
             </select>
+          </div>
+
+          <div className="pt-2 border-t border-[var(--border-subtle)] space-y-3">
+            <div className="space-y-1.5">
+              <label htmlFor="caregiverNameField" className="block text-[1.0625rem] font-semibold text-[#0F1F2E] dark:text-slate-200">
+                {isTa ? 'பராமரிப்பாளர் பெயர் (SOS அழைப்பிற்கு)' : 'Caregiver Name (for SOS)'}
+              </label>
+              <input
+                id="caregiverNameField"
+                type="text"
+                maxLength={40}
+                value={caregiverName}
+                onChange={(e) => setCaregiverName(e.target.value)}
+                placeholder={isTa ? 'எ.கா. மகள் / சகோதரர்' : 'e.g. Family Caregiver'}
+                className="w-full min-h-[52px] px-4 py-2.5 rounded-2xl bg-[#F2F7F6] dark:bg-[#0B1220] text-[1.0625rem] text-[#0F1F2E] dark:text-white"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label htmlFor="caregiverPhoneField" className="block text-[1.0625rem] font-semibold text-[#0F1F2E] dark:text-slate-200">
+                {isTa ? 'பராமரிப்பாளர் தொலைபேசி எண்' : 'Caregiver Phone Number'}
+              </label>
+              <input
+                id="caregiverPhoneField"
+                type="tel"
+                maxLength={24}
+                value={caregiverPhone}
+                onChange={(e) => setCaregiverPhone(e.target.value)}
+                placeholder={isTa ? 'எ.கா. +91 98XXX XXXXX' : 'e.g. +91 98XXX XXXXX'}
+                className="w-full min-h-[52px] px-4 py-2.5 rounded-2xl bg-[#F2F7F6] dark:bg-[#0B1220] text-[1.0625rem] text-[#0F1F2E] dark:text-white tabular-nums"
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3 pt-2">

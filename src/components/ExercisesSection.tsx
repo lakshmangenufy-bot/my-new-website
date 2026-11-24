@@ -367,7 +367,7 @@ export const ExercisesSection: React.FC<ExercisesSectionProps> = ({
             <span>
               {isCompleted
                 ? isTa
-                  ? 'முடிந்தது (மாற்றத் தொடவும்)'
+                  ? 'முடிந்தது ✓ (மாற்றத் தொடவும்)'
                   : 'Completed ✓ (Tap to Undo)'
                 : isTa
                 ? 'பயிற்சியை முடித்தேன்'
@@ -395,7 +395,7 @@ export const ExercisesSection: React.FC<ExercisesSectionProps> = ({
           </div>
 
           <div className="rounded-[24px] bg-[#F2F7F6] dark:bg-[#0B1220] p-5 space-y-2.5">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2">
               <h4 className="text-[1rem] font-semibold text-[#3A4753] dark:text-[#D3DFE9]">
                 {isTa ? 'இன்றைய பயிற்சிப் பதிவு' : 'Completed Exercise Log'}
               </h4>
@@ -403,9 +403,10 @@ export const ExercisesSection: React.FC<ExercisesSectionProps> = ({
                 <button
                   type="button"
                   onClick={onClearHistory}
-                  className="text-[1rem] font-semibold text-[#1F6F63] dark:text-[#2DD4BF] hover:underline flex items-center gap-1 cursor-pointer"
+                  aria-label={isTa ? 'உடற்பயிற்சிப் பதிவை அழி' : 'Clear completed exercise log'}
+                  className="min-h-[44px] px-3 py-1.5 rounded-full text-[1rem] font-semibold text-[#1F6F63] dark:text-[#2DD4BF] hover:bg-[#E3F1ED] dark:hover:bg-[#112A27] flex items-center gap-1.5 cursor-pointer"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-4 h-4" aria-hidden="true" />
                   <span>{isTa ? 'அழி' : 'Clear'}</span>
                 </button>
               )}
